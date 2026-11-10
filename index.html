@@ -1,0 +1,1853 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Şube Operasyon Paneli</title>
+<meta name="description" content="Örnek şube operasyon paneli: günlük dağıtım göstergeleri, ertesi gün planlama ve kurye ihtiyacı, ekip performansı, müşteri memnuniyeti ve ziyaret planı, satış hedefi takibi.">
+<meta property="og:title" content="Şube Operasyon Paneli — örnek çalışma">
+<meta property="og:description" content="Ferhat Acıcı tarafından DHL eCommerce Bursa Şube Müdürü başvurusu için hazırlanmış örnek panel. Tüm veriler örnek amaçlı üretilmiştir; şirkete ait değildir.">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="tr_TR">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="anonymous" referrerpolicy="no-referrer">
+<style>
+/* ===== Renk ve tipografi belirteçleri (token) ===== */
+:root, :root[data-theme="light"] {
+  color-scheme: light;
+  --bg: #f1f5f5;
+  --surface: #ffffff;
+  --surface-2: #edf3f3;
+  --ink: #122326;
+  --ink-2: #364b4f;
+  --muted: #5d7074;
+  --line: #dce6e7;
+  --line-strong: #bccdcf;
+  --head-bg: #0b3940;
+  --head-ink: #eef6f6;
+  --head-muted: #a6c3c6;
+  --head-line: #19505a;
+  --head-accent: #f28c38;
+  --primary: #0d6672;
+  --primary-ink: #ffffff;
+  --primary-soft: #dbeeef;
+  --accent: #b0520e;
+  --accent-soft: #fcebdc;
+  --good: #1b7a4a;
+  --good-soft: #ddf1e5;
+  --warn: #965800;
+  --warn-soft: #fcefd5;
+  --crit: #b42318;
+  --crit-soft: #fde4e1;
+  --chart-grid: #dfe8e9;
+  --chart-1: #0d6672;
+  --chart-2: #d0691c;
+  --chart-target: #b42318;
+  --chart-band: #e2f0f0;
+  --map-bg: #dce5e6;
+  --on-map: #ffffff;
+  --focus: #e07a1f;
+  --shadow: 0 1px 2px rgba(18, 35, 38, 0.05);
+  --pop-shadow: 0 8px 28px rgba(18, 35, 38, 0.14), 0 1px 3px rgba(18, 35, 38, 0.08);
+  --font-sans: "IBM Plex Sans", "Segoe UI", system-ui, -apple-system, Roboto, Arial, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --bg: #091416;
+    --surface: #0f1f22;
+    --surface-2: #14282c;
+    --ink: #e2eeef;
+    --ink-2: #b0c5c8;
+    --muted: #86a0a4;
+    --line: #1e3539;
+    --line-strong: #2e4b50;
+    --head-bg: #051416;
+    --head-ink: #e9f4f4;
+    --head-muted: #92b2b5;
+    --head-line: #15302f;
+    --head-accent: #f5a35c;
+    --primary: #5cc3cf;
+    --primary-ink: #04181b;
+    --primary-soft: #123a40;
+    --accent: #f5a35c;
+    --accent-soft: #3a2412;
+    --good: #5ccb8f;
+    --good-soft: #10301f;
+    --warn: #f2b84f;
+    --warn-soft: #362810;
+    --crit: #ff8075;
+    --crit-soft: #3d1714;
+    --chart-grid: #1b3034;
+    --chart-1: #5cc3cf;
+    --chart-2: #f5a35c;
+    --chart-target: #ff8075;
+    --chart-band: #14343a;
+    --map-bg: #0e1d20;
+    --on-map: #ffffff;
+    --focus: #f5a35c;
+    --shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+    --pop-shadow: 0 10px 30px rgba(0, 0, 0, 0.55), 0 1px 3px rgba(0, 0, 0, 0.5);
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #091416;
+  --surface: #0f1f22;
+  --surface-2: #14282c;
+  --ink: #e2eeef;
+  --ink-2: #b0c5c8;
+  --muted: #86a0a4;
+  --line: #1e3539;
+  --line-strong: #2e4b50;
+  --head-bg: #051416;
+  --head-ink: #e9f4f4;
+  --head-muted: #92b2b5;
+  --head-line: #15302f;
+  --head-accent: #f5a35c;
+  --primary: #5cc3cf;
+  --primary-ink: #04181b;
+  --primary-soft: #123a40;
+  --accent: #f5a35c;
+  --accent-soft: #3a2412;
+  --good: #5ccb8f;
+  --good-soft: #10301f;
+  --warn: #f2b84f;
+  --warn-soft: #362810;
+  --crit: #ff8075;
+  --crit-soft: #3d1714;
+  --chart-grid: #1b3034;
+  --chart-1: #5cc3cf;
+  --chart-2: #f5a35c;
+  --chart-target: #ff8075;
+  --chart-band: #14343a;
+  --map-bg: #0e1d20;
+  --on-map: #ffffff;
+  --focus: #f5a35c;
+  --shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --pop-shadow: 0 10px 30px rgba(0, 0, 0, 0.55), 0 1px 3px rgba(0, 0, 0, 0.5);
+}
+/* ===== Temel ===== */
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--font-sans); font-size: 15px; line-height: 1.5; overflow-x: hidden; }
+h1, h2, h3, h4 { margin: 0; line-height: 1.25; }
+p { margin: 0 0 0.6rem; }
+a { color: var(--primary); }
+a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible, [tabindex]:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+.wrap { max-width: 1260px; margin: 0 auto; padding: 0 16px; }
+.num, td, .kpi-val { font-variant-numeric: tabular-nums; }
+.muted { color: var(--muted); }
+.small { font-size: 12.5px; }
+[hidden] { display: none !important; }
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+/* ===== Üst bölüm ===== */
+.top { background: var(--head-bg); color: var(--head-ink); border-bottom: 1px solid var(--head-line); font-size: 14px; }
+.top-row { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 20px; padding-top: 12px; padding-bottom: 6px; }
+.top h1 { font-size: 1.15rem; font-weight: 600; letter-spacing: -0.01em; display: inline-flex; align-items: center; gap: 9px; }
+.top h1::before { content: ""; width: 14px; height: 14px; border-radius: 3px; background: var(--head-accent); box-shadow: inset 0 0 0 3px var(--head-bg), inset 0 0 0 5px var(--head-accent); flex: none; }
+.note { margin: 0; flex: 1 1 320px; font-size: 12.5px; color: var(--head-muted); }
+.theme-btn { font: inherit; font-size: 12.5px; color: var(--head-muted); background: transparent; border: 1px solid var(--head-line); border-radius: 999px; padding: 4px 12px; min-height: 30px; cursor: pointer; }
+.theme-btn:hover { color: var(--head-ink); border-color: var(--head-muted); }
+.tabs { display: flex; gap: 4px; overflow-x: auto; scrollbar-width: thin; -webkit-overflow-scrolling: touch; }
+.tabs a { flex: 0 0 auto; display: block; padding: 8px 12px 9px; color: var(--head-muted); text-decoration: none; font-weight: 500; font-size: 14px; border-bottom: 2px solid transparent; white-space: nowrap; }
+.tabs a:first-child { margin-left: -12px; }
+.tabs a:hover { color: var(--head-ink); }
+.tabs a[aria-selected="true"] { color: var(--head-ink); border-bottom-color: var(--head-accent); }
+.tabs .t-short { display: none; }
+/* Bağlam satırı */
+.ctx-row { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 16px; padding-top: 14px; padding-bottom: 2px; }
+.ctx-title { margin: 0; display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 10px; min-width: 0; font-size: 14px; color: var(--ink); }
+.ctx-title b { font-weight: 600; }
+.ctx-title span { font-size: 12.5px; color: var(--muted); }
+.ctx .grow { flex: 1 1 auto; }
+.tag-sample { font-size: 12px; font-weight: 600; color: var(--muted); background: var(--surface-2); border: 1px solid var(--line); border-radius: 999px; padding: 0 9px; white-space: nowrap; }
+.duty { font-size: 12.5px; color: var(--ink-2); margin: 0; }
+.duty b { font-weight: 600; color: var(--accent); }
+.linkbtn { font: inherit; font-size: 12.5px; font-weight: 500; color: var(--primary); background: none; border: 0; padding: 4px 2px; cursor: pointer; border-radius: 3px; white-space: nowrap; }
+.linkbtn:hover { text-decoration: underline; }
+/* ===== Paneller ===== */
+main { padding-top: 12px; padding-bottom: 32px; }
+.pane { font-size: 14px; }
+section.pane > * + * { margin-top: 12px; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 16px 18px; box-shadow: var(--shadow); min-width: 0; }
+.card-h { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 6px 12px; margin-bottom: 8px; }
+.card-h h3 { font-size: 14px; font-weight: 600; }
+.card-h .grow { flex: 1 1 auto; }
+.card-h select { font-size: 13.5px; border-color: var(--line); padding: 3px 6px; min-height: 30px; }
+.card h4 { font-size: 13px; font-weight: 600; color: var(--ink-2); margin: 14px 0 6px; }
+.grid-2 { display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr); gap: 12px; align-items: start; }
+.grid-2.even { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+.grid-2 > * { min-width: 0; }
+.grid-2.plan-grid { grid-template-columns: minmax(0, 1fr) minmax(0, 1.12fr); }
+.col > * + * { margin-top: 12px; }
+@media (max-width: 1100px) { .grid-2, .grid-2.even, .grid-2.plan-grid { grid-template-columns: minmax(0, 1fr); } }
+/* ===== Durum çipleri ===== */
+.chip { display: inline-flex; align-items: center; gap: 5px; font-size: 0.75rem; font-weight: 600; padding: 2px 9px 2px 8px; border-radius: 999px; white-space: nowrap; border: 1px solid transparent; }
+.chip::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: currentColor; flex: none; }
+.chip.good { color: var(--good); background: var(--good-soft); }
+.chip.warn { color: var(--warn); background: var(--warn-soft); }
+.chip.crit { color: var(--crit); background: var(--crit-soft); }
+.chip.na { color: var(--muted); background: var(--surface-2); }
+.chip.info { color: var(--primary); background: var(--primary-soft); }
+/* ===== Gösterge kartları ===== */
+.kpi-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+.kpi-grid.six, .kpi-grid.three { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.kpi { position: relative; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px 12px 18px; display: flex; flex-direction: column; gap: 4px; min-width: 0; box-shadow: var(--shadow); }
+.kpi-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
+.kpi-top h3 { font-size: 14px; font-weight: 500; color: var(--ink-2); line-height: 1.35; }
+.kpi-top .chip { flex: none; }
+.kpi-val { font-size: 30px; font-weight: 600; letter-spacing: -0.02em; line-height: 1.15; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.kpi-val .u { font-size: 14px; font-weight: 500; color: var(--muted); letter-spacing: 0; margin-left: 4px; white-space: nowrap; }
+.kpi-foot { font-size: 12.5px; color: var(--muted); line-height: 1.45; }
+.kpi-foot b { color: var(--ink-2); font-weight: 600; }
+.delta { font-weight: 600; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.delta.better { color: var(--good); }
+.delta.worse { color: var(--crit); }
+.delta.flat { color: var(--muted); }
+.kf { font-family: var(--font-mono); font-size: 11.5px; color: var(--ink-2); background: var(--surface-2); border-radius: 4px; padding: 5px 8px; line-height: 1.5; margin: 6px 0 0; overflow-wrap: anywhere; }
+.kf .kf-l { font-family: var(--font-sans); font-weight: 600; color: var(--muted); margin-right: 4px; }
+.kf .kf-c { display: block; color: var(--ink); }
+/* Liste kutuları */
+.trend-card .card-h { justify-content: flex-start; gap: 6px 14px; }
+.legend { display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 12.5px; color: var(--muted); margin: 0 0 0 auto; }
+.legend i { display: inline-block; width: 18px; height: 3px; vertical-align: middle; margin-right: 6px; background: var(--chart-1); }
+.legend i.tg { background: transparent; border-top: 2px dashed var(--chart-target); height: 0; }
+.legend i.plan { background: transparent; border-top: 2px dashed var(--chart-2); height: 0; }
+.prio { list-style: none; margin: 0; padding: 0; }
+.prio li { border-bottom: 1px solid var(--line); padding: 10px 2px; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 2px 10px; align-items: center; }
+.prio li:last-child { border-bottom: 0; }
+.prio .pi-txt { min-width: 0; }
+.prio .pi-k { color: var(--ink-2); }
+.prio .pi-g { color: var(--muted); font-size: 12.5px; font-variant-numeric: tabular-nums; }
+.prio .pi-a { grid-column: 1 / -1; font-size: 12.5px; color: var(--ink-2); line-height: 1.45; }
+.prio-empty { font-size: 14px; color: var(--ink-2); padding: 10px 0; margin: 0; }
+.foot-row { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 6px 20px; padding: 2px 2px 0; }
+/* ===== Tablolar ===== */
+.tbl-wrap { position: relative; overflow-x: auto; -webkit-overflow-scrolling: touch; max-width: 100%; }
+table { border-collapse: collapse; width: 100%; font-size: 13.5px; }
+th, td { padding: 7px 12px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: middle; }
+th { color: var(--muted); font-weight: 500; font-size: 12.5px; white-space: nowrap; vertical-align: bottom; }
+td.n, th.n { text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
+tbody tr:hover td { background: var(--surface-2); }
+tbody tr:last-child td { border-bottom: 0; }
+tfoot td { font-weight: 600; border-top: 1px solid var(--line-strong); border-bottom: 0; }
+td .sub, th .sub { display: block; font-size: 12px; color: var(--muted); font-weight: 400; white-space: nowrap; }
+td.neg { color: var(--crit); font-weight: 600; }
+.nowrap { white-space: nowrap; }
+.tbl-card { padding: 14px 0 4px; }
+.tbl-card > .card-h, .tbl-card > .card-note, .tbl-card > .kf { padding-left: 18px; padding-right: 18px; }
+.tbl-card > .kf { margin: 0 18px 8px; padding: 5px 8px; }
+.tbl-card th:first-child, .tbl-card td:first-child { padding-left: 18px; }
+.tbl-card th:last-child, .tbl-card td:last-child { padding-right: 18px; }
+.card-note { font-size: 12.5px; color: var(--muted); margin: 0 0 8px; }
+.tbl-card .card-note.end { margin: 8px 0 10px; }
+.zno { display: inline-flex; align-items: center; justify-content: center; width: 20px; height: 20px; border-radius: 50%; font-size: 11px; font-weight: 600; background: var(--primary-soft); color: var(--primary); margin-right: 6px; vertical-align: middle; }
+.band-txt { color: var(--muted); font-size: 12px; }
+/* Yatay çubuklar */
+.hb { display: grid; grid-template-columns: minmax(110px, 0.9fr) minmax(0, 1.6fr) auto; align-items: center; gap: 6px 10px; font-size: 13px; }
+.hb-l { color: var(--ink-2); min-width: 0; }
+.hb-t { height: 10px; border-radius: 999px; background: var(--surface-2); position: relative; overflow: hidden; }
+.hb-t > span { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 999px; background: var(--chart-1); }
+.hb-t.alt > span { background: var(--chart-2); }
+.hb-t.crit > span { background: var(--crit); }
+.hb-t.muted > span { background: var(--line-strong); }
+.hb-v { text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; color: var(--ink); }
+.hb-v .sub { color: var(--muted); font-size: 12px; margin-left: 4px; }
+/* Huni */
+.fn { display: grid; grid-template-columns: minmax(120px, 0.8fr) minmax(0, 1.4fr) auto auto; grid-auto-flow: row dense; align-items: center; gap: 8px 14px; font-size: 13px; }
+.fn .bar-c { grid-column: 2; }
+.fn .c3 { grid-column: 3; }
+.fn .c4 { grid-column: 4; }
+.fn .h { font-size: 12px; color: var(--muted); }
+.fn .r { text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.rem-b { margin-bottom: 12px; }
+.rem-v { font-size: 24px; }
+.rem-n { margin: 0; }
+/* ===== Formlar ===== */
+input[type="text"], select { font: inherit; font-size: 0.92rem; color: var(--ink); background: var(--surface); border: 1px solid var(--line-strong); border-radius: 4px; padding: 6px 8px; min-height: 34px; max-width: 100%; }
+input[type="text"].num-in { font-variant-numeric: tabular-nums; text-align: right; }
+input[aria-invalid="true"] { border-color: var(--crit); background: var(--crit-soft); }
+.err { color: var(--crit); font-size: 0.8rem; }
+.err:empty { display: none; }
+.seg { display: inline-flex; border: 1px solid var(--line); border-radius: 6px; overflow: hidden; }
+.seg button { font: inherit; font-size: 12.5px; font-weight: 500; color: var(--ink-2); background: var(--surface); border: 0; padding: 3px 10px; min-height: 28px; cursor: pointer; }
+.seg button + button { border-left: 1px solid var(--line); }
+.seg button[aria-pressed="true"] { background: var(--primary-soft); color: var(--primary); }
+.wi { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px 16px; margin: 0; }
+.wi-f { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.wi-f label { font-size: 12.5px; color: var(--muted); }
+.wi-f input { width: 100%; }
+.wi-out { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px 16px; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--line); }
+.wi-out .o-l { font-size: 12.5px; color: var(--muted); }
+.wi-out .o-v { font-size: 22px; font-weight: 600; font-variant-numeric: tabular-nums; letter-spacing: -0.01em; }
+.wi-out .o-v .u { font-size: 13px; font-weight: 500; color: var(--muted); margin-left: 3px; }
+/* ===== Grafik ===== */
+.chart-box { width: 100%; min-height: 200px; position: relative; }
+svg.chart { display: block; max-width: 100%; }
+.ch-grid { stroke: var(--chart-grid); stroke-width: 1; }
+.ch-axis { stroke: var(--line-strong); stroke-width: 1; }
+.ch-txt { fill: var(--muted); font-family: var(--font-mono); font-size: 11px; }
+.ch-s1 { stroke: var(--chart-1); fill: none; stroke-width: 2.25; }
+.ch-plan { stroke: var(--chart-2); fill: none; stroke-width: 2; stroke-dasharray: 6 4; }
+.ch-p1 { fill: var(--chart-1); stroke: var(--surface); stroke-width: 1.5; }
+.ch-pplan { fill: var(--chart-2); stroke: var(--surface); stroke-width: 1; }
+.ch-target { stroke: var(--chart-target); stroke-width: 1.5; stroke-dasharray: 6 4; fill: none; }
+.ch-target-txt { fill: var(--chart-target); font-family: var(--font-mono); font-size: 11px; paint-order: stroke; stroke: var(--surface); stroke-width: 4px; stroke-linejoin: round; }
+/* ===== Harita ===== */
+.map-box { height: 380px; border: 1px solid var(--line); border-radius: 8px; background: var(--map-bg); position: relative; overflow: hidden; }
+#map { position: absolute; inset: 0; }
+.map-note { font-size: 12.5px; padding: 6px 10px; margin: 0 0 8px; border-left: 4px solid var(--accent); background: var(--accent-soft); border-radius: 0 4px 4px 0; }
+.map-note:empty { display: none; }
+.map-foot { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 16px; margin-top: 8px; font-size: 12.5px; color: var(--muted); }
+.leaflet-container { background: var(--map-bg); font-family: var(--font-sans); }
+.bm-koyu{filter:brightness(.6) contrast(1.15)}
+path.mk-zone { stroke: var(--on-map); stroke-width: 2; fill-opacity: 0.82; }
+path.mk-zone.st-good { fill: var(--good); }
+path.mk-zone.st-warn { fill: var(--warn); }
+path.mk-zone.st-crit { fill: var(--crit); }
+.mk-branch { display: block; width: 16px; height: 16px; border-radius: 3px; background: var(--head-accent); border: 3px solid var(--on-map); box-shadow: var(--shadow); }
+.leaflet-popup-content-wrapper, .leaflet-popup-tip { background: var(--surface); color: var(--ink); }
+.leaflet-popup-content { font-size: 0.84rem; line-height: 1.45; margin: 12px 14px; }
+.leaflet-container a.leaflet-popup-close-button { color: var(--muted); }
+.leaflet-control-attribution { font-size: 0.68rem; }
+.leaflet-control-layers { background: var(--surface); color: var(--ink); border-color: var(--line); }
+.leaflet-control-layers-expanded { padding: 6px 10px; font-size: 13px; }
+.pop h4 { font-size: 0.9rem; margin-bottom: 4px; }
+.pop table { font-size: 0.8rem; width: auto; }
+.pop td { padding: 2px 10px 2px 0; border: 0; }
+.pop tr:hover td { background: transparent; }
+.pop .src { display: block; font-size: 12px; color: var(--muted); margin-top: 3px; }
+.schem { width: 100%; height: 100%; display: block; }
+.sc-z { fill-opacity: 0.85; stroke: var(--surface); stroke-width: 2; }
+.sc-z.st-good { fill: var(--good); }
+.sc-z.st-warn { fill: var(--warn); }
+.sc-z.st-crit { fill: var(--crit); }
+.sc-hit { cursor: pointer; }
+.sc-hit:focus-visible { outline: none; }
+.sc-hit:focus-visible circle { stroke: var(--focus); stroke-width: 3; }
+.sc-no { fill: var(--on-map); font-size: 11px; font-weight: 600; font-family: var(--font-sans); pointer-events: none; }
+.sc-br { fill: var(--head-accent); stroke: var(--surface); stroke-width: 2; }
+.sc-info { position: absolute; right: 10px; top: 10px; max-width: min(260px, calc(100% - 20px)); background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 10px 12px; box-shadow: var(--shadow); font-size: 0.84rem; }
+.sc-info:empty { display: none; }
+/* ===== Alt bilgi ===== */
+footer { border-top: 1px solid var(--line); background: var(--surface); padding: 14px 0 18px; font-size: 14px; color: var(--ink-2); }
+footer p { margin: 0; }
+footer .contact { user-select: text; font-weight: 500; color: var(--ink); }
+footer .foot-note { font-size: 12.5px; color: var(--muted); margin-top: 2px; }
+/* ===== Duyarlı düzen ===== */
+@media (max-width: 900px) {
+  .kpi-grid, .kpi-grid.six, .kpi-grid.three { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .kpi-grid.three > :last-child:nth-child(odd) { grid-column: 1 / -1; }
+  .wi, .wi-out { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 600px) {
+  body { font-size: 14.5px; }
+  .top-row { padding-top: 10px; }
+  .top h1 { flex: 1 1 auto; font-size: 1.05rem; }
+  .note { order: 3; flex-basis: 100%; }
+  .tabs a { padding: 8px 10px 9px; }
+  .tabs .t-long { display: none; }
+  .tabs .t-short { display: inline; }
+  .kpi-grid { gap: 10px; }
+  .kpi { padding: 12px 12px 10px 13px; }
+  .kpi-top { flex-direction: column-reverse; gap: 4px; }
+  .kpi-val { font-size: 23px; }
+  .kpi-val .u { font-size: 12.5px; margin-left: 2px; }
+  .kf { font-size: 11px; padding: 4px 6px; }
+  .legend { margin-left: 0; }
+  .card { padding: 14px; }
+  .tbl-card { padding: 14px 0 4px; }
+  .tbl-card > .card-h, .tbl-card > .card-note { padding-left: 14px; padding-right: 14px; }
+  .tbl-card > .kf { margin: 0 14px 8px; }
+  .tbl-card th:first-child, .tbl-card td:first-child { padding-left: 14px; }
+  .tbl-card th:last-child, .tbl-card td:last-child { padding-right: 14px; }
+  th, td { padding-left: 9px; padding-right: 9px; }
+  .map-box { height: 320px; }
+  .hb { grid-template-columns: minmax(0, 1fr) auto; }
+  .hb-t { grid-column: 1 / -1; order: 3; }
+  .fn { grid-template-columns: minmax(0, 1fr) auto auto; }
+  .fn .bar-c { grid-column: 1 / -1; }
+  .fn .c3 { grid-column: 2; }
+  .fn .c4 { grid-column: 3; }
+  .fn .h.bar-c { display: none; }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .tabs a, .chip, .seg button { transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="wrap top-row">
+    <h1>Şube Operasyon Paneli</h1>
+    <p class="note" id="disclaimer">Örnek çalışma — Ferhat Acıcı tarafından DHL eCommerce Bursa Şube Müdürü başvurusu için hazırlanmıştır. Tüm veriler örnek amaçlı üretilmiştir; şirkete ait değildir.</p>
+    <button type="button" id="themeBtn" class="theme-btn" aria-pressed="false">Koyu tema</button>
+  </div>
+  <nav class="wrap tabs" role="tablist" aria-label="Panel bölümleri">
+    <a href="#ozet" id="tab-ozet" role="tab" aria-controls="panel-ozet" aria-selected="true"><span class="t-long">Şube Özeti</span><span class="t-short">Özet</span></a>
+    <a href="#plan" id="tab-plan" role="tab" aria-controls="panel-plan" aria-selected="false"><span class="t-long">Günlük Planlama</span><span class="t-short">Planlama</span></a>
+    <a href="#ekip" id="tab-ekip" role="tab" aria-controls="panel-ekip" aria-selected="false"><span class="t-long">Ekip ve Kurye Performansı</span><span class="t-short">Ekip</span></a>
+    <a href="#musteri" id="tab-musteri" role="tab" aria-controls="panel-musteri" aria-selected="false"><span class="t-long">Müşteri Memnuniyeti ve Ziyaretler</span><span class="t-short">Müşteri</span></a>
+    <a href="#satis" id="tab-satis" role="tab" aria-controls="panel-satis" aria-selected="false"><span class="t-long">Satış ve Hedef</span><span class="t-short">Satış</span></a>
+  </nav>
+</header>
+
+<div class="ctx">
+  <div class="wrap ctx-row">
+    <p class="ctx-title" id="ctxTitle"></p>
+    <span class="grow"></span>
+    <span class="tag-sample">Bursa Merkez Şube (örnek)</span>
+  </div>
+  <div class="wrap"><p class="duty" id="dutyLine"></p></div>
+</div>
+
+<noscript><div class="wrap"><p>Bu panel JavaScript ile çalışır. Lütfen tarayıcınızda JavaScript'i etkinleştirin.</p></div></noscript>
+
+<main class="wrap">
+
+<!-- ================= 1. ŞUBE ÖZETİ ================= -->
+<section id="panel-ozet" class="pane" role="tabpanel" aria-labelledby="tab-ozet">
+  <h2 class="sr-only">Şube Özeti</h2>
+  <div class="kpi-grid six" id="ozTiles"></div>
+  <div class="grid-2">
+    <div class="card trend-card">
+      <div class="card-h">
+        <h3>Son 12 hafta</h3>
+        <select id="trendSel" aria-label="Eğilimi gösterilecek gösterge"></select>
+        <div class="legend"><span><i></i>Şube, haftalık</span><span id="trendLegTg"><i class="tg"></i>Hedef</span></div>
+      </div>
+      <div class="chart-box" id="trendChart"></div>
+      <p class="card-note" id="trendNote"></p>
+    </div>
+    <div class="card">
+      <div class="card-h"><h3>Bugün dikkat</h3><span class="muted small">En büyük üç sapma</span></div>
+      <ol class="prio" id="attList"></ol>
+    </div>
+  </div>
+  <div class="foot-row">
+    <span class="muted small" id="ozFoot"></span>
+    <button type="button" class="linkbtn" data-tgl aria-controls="ozDetail" aria-expanded="false" data-on="Detayı gizle" data-off="Detay: son 12 iş günü">Detay: son 12 iş günü</button>
+  </div>
+  <div class="card tbl-card" id="ozDetail" hidden>
+    <div class="card-h"><h3>Günlük şube verisi</h3><span class="muted small">adet</span></div>
+    <div class="tbl-wrap"><table id="ozTable"></table></div>
+    <p class="card-note end">Dağıtıma çıkan = şubeye gelen + önceki günden devir. Dağıtıma çıkan = teslim edilen + iade + devir. Kabul edilen gönderiler şubeden çıkış yapan (gönderici tarafı) gönderilerdir.</p>
+  </div>
+</section>
+
+<!-- ================= 2. GÜNLÜK PLANLAMA ================= -->
+<section id="panel-plan" class="pane" role="tabpanel" aria-labelledby="tab-plan" hidden>
+  <h2 class="sr-only">Günlük Planlama</h2>
+  <div class="kpi-grid" id="plTiles"></div>
+  <div class="grid-2 plan-grid">
+    <div class="col">
+    <div class="card">
+      <div class="card-h"><h3>Dağıtım bölgeleri</h3><span class="muted small">Daire büyüklüğü yarınki P50 tahminini, rengi ilk denemede teslim durumunu gösterir</span></div>
+      <p class="map-note" id="mapNote"></p>
+      <div class="map-box" id="mapBox"><div id="map" role="region" aria-label="Dağıtım bölgeleri haritası"></div><div class="sc-info" id="scInfo" aria-live="polite"></div></div>
+      <div class="map-foot"><span>Bölge merkezleri yaklaşıktır. Turuncu kare şubenin örnek konumudur.</span></div>
+    </div>
+    <div class="card">
+      <div class="card-h"><h3>Ne olursa? Yarın için kapasite denemesi</h3><button type="button" class="linkbtn" id="wiReset">Varsayılan değerlere dön</button></div>
+    <form id="wiForm" class="wi" novalidate>
+      <div class="wi-f"><label for="wiK">Kurye sayısı</label><input type="text" inputmode="numeric" class="num-in" id="wiK" autocomplete="off"><span class="err" id="wiK-err" aria-live="polite"></span></div>
+      <div class="wi-f"><label for="wiH">Efektif tur süresi (saat)</label><input type="text" inputmode="decimal" class="num-in" id="wiH" autocomplete="off"><span class="err" id="wiH-err" aria-live="polite"></span></div>
+      <div class="wi-f"><label for="wiV">Beklenen gönderi (adet)</label><input type="text" inputmode="numeric" class="num-in" id="wiV" autocomplete="off"><span class="err" id="wiV-err" aria-live="polite"></span></div>
+    </form>
+      <div class="wi-out" id="wiOut" aria-live="polite"></div>
+      <p class="kf" id="wiF"></p>
+    </div>
+    </div>
+    <div class="card tbl-card">
+      <div class="card-h"><h3>Bölge bazında yarınki ihtiyaç</h3><span class="muted small" id="zoneDate"></span></div>
+      <div class="tbl-wrap"><table id="zoneTable"></table></div>
+      <p class="card-note end" id="zoneNote"></p>
+    </div>
+  </div>
+  <div class="foot-row">
+    <span class="muted small">Tahmin, haftanın aynı gününün son 4 haftalık ortalaması ile trend katsayısının çarpımına dayanır; tek bir rakam yerine P10–P90 aralığı verilir.</span>
+    <button type="button" class="linkbtn" data-tgl aria-controls="fcDetail" aria-expanded="false" data-on="Detayı gizle" data-off="Detay: tahmin girdileri">Detay: tahmin girdileri</button>
+  </div>
+  <div class="card tbl-card" id="fcDetail" hidden>
+    <div class="card-h"><h3>Tahmin girdileri</h3><span class="muted small" id="fcDays"></span></div>
+    <p class="kf" id="fcTrend"></p>
+    <div class="tbl-wrap"><table id="fcTable"></table></div>
+  </div>
+</section>
+
+<!-- ================= 3. EKİP VE KURYE PERFORMANSI ================= -->
+<section id="panel-ekip" class="pane" role="tabpanel" aria-labelledby="tab-ekip" hidden>
+  <h2 class="sr-only">Ekip ve Kurye Performansı</h2>
+  <div class="kpi-grid" id="ekTiles"></div>
+  <div class="grid-2">
+    <div class="card tbl-card">
+      <div class="card-h"><h3>Kurye sıralaması</h3><span class="muted small" id="crPeriod"></span></div>
+      <p class="kf"><span class="kf-l">Puan</span>100 × (0,35 × hız + 0,25 × ilk deneme + 0,20 × devir + 0,20 × şikâyet)<span class="kf-c">Hız ve ilk deneme endeksi kurye ÷ şube, devir ve şikâyet endeksi şube ÷ kurye olarak hesaplanır; her endeks en çok 1,2 alınır. Şube ortalaması 100 puandır.</span></p>
+      <div class="tbl-wrap"><table id="crTable"></table></div>
+      <p class="card-note end">Bölge koşulları farklı olduğu için sıralama tek başına bir değerlendirme ölçütü değildir; koçluk görüşmesine girdi olarak kullanılır. Kırmızı değer, şube hedefinin dışında kalan göstergedir.</p>
+    </div>
+    <div class="card">
+      <div class="card-h"><h3>Koçluk önerileri</h3><span class="muted small">Puanı en düşük üç kurye</span></div>
+      <ol class="prio" id="coachList"></ol>
+    </div>
+  </div>
+  <div class="foot-row">
+    <span class="muted small">Her kurye günde iki dağıtım turu yapar: 1. tur 09:00–13:00, 2. tur 14:00–18:30.</span>
+    <button type="button" class="linkbtn" data-tgl aria-controls="shiftDetail" aria-expanded="false" data-on="Detayı gizle" data-off="Detay: tur özeti">Detay: tur özeti</button>
+  </div>
+  <div class="card tbl-card" id="shiftDetail" hidden>
+    <div class="card-h"><h3>Dağıtım turu özeti</h3><span class="muted small" id="shiftPeriod"></span></div>
+    <div class="tbl-wrap"><table id="shiftTable"></table></div>
+    <p class="card-note end">Önceki günden devreden gönderiler 1. turda dağıtılır. Kapasiteyi aşan gönderiler 2. turdan ertesi güne devreder.</p>
+  </div>
+</section>
+
+<!-- ================= 4. MÜŞTERİ MEMNUNİYETİ VE ZİYARETLER ================= -->
+<section id="panel-musteri" class="pane" role="tabpanel" aria-labelledby="tab-musteri" hidden>
+  <h2 class="sr-only">Müşteri Memnuniyeti ve Ziyaretler</h2>
+  <div class="kpi-grid" id="muTiles"></div>
+  <div class="grid-2 even">
+    <div class="card">
+      <div class="card-h"><h3>Şikâyet kategorileri</h3><span class="muted small" id="catPeriod"></span></div>
+      <div id="catBars"></div>
+      <h4>Açık şikâyetlerin yaşı</h4>
+      <div id="ageBars"></div>
+    </div>
+    <div class="card">
+      <div class="card-h"><h3>Bu hafta ziyaret edilecekler</h3><span class="muted small">Risk puanı en yüksek 5 kurumsal müşteri</span></div>
+      <p class="kf"><span class="kf-l">Risk puanı</span>0,5 × hacim düşüşü puanı + 0,3 × açık şikâyet puanı + 0,2 × ziyaret aralığı puanı<span class="kf-c">hacim: düşüş % × 4 · şikâyet: açık şikâyet ÷ 3 × 100 · ziyaret: geçen gün ÷ 90 × 100 (her biri en çok 100)</span></p>
+      <ol class="prio" id="visitList"></ol>
+    </div>
+  </div>
+  <div class="foot-row">
+    <span class="muted small">Hacim düşüşü = (Temmuz–Eylül ortalaması − Ekim) ÷ Temmuz–Eylül ortalaması × 100; artış varsa 0 alınır.</span>
+    <button type="button" class="linkbtn" data-tgl aria-controls="custDetail" aria-expanded="false" data-on="Detayı gizle" data-off="Detay: tüm kurumsal müşteriler">Detay: tüm kurumsal müşteriler</button>
+  </div>
+  <div class="card tbl-card" id="custDetail" hidden>
+    <div class="card-h"><h3>Kurumsal müşteriler</h3><span class="muted small">risk puanına göre sıralı</span></div>
+    <div class="tbl-wrap"><table id="custTable"></table></div>
+  </div>
+</section>
+
+<!-- ================= 5. SATIŞ VE HEDEF ================= -->
+<section id="panel-satis" class="pane" role="tabpanel" aria-labelledby="tab-satis" hidden>
+  <h2 class="sr-only">Satış ve Hedef</h2>
+  <div class="kpi-grid three" id="saTiles"></div>
+  <div class="grid-2">
+    <div class="card trend-card">
+      <div class="card-h">
+        <h3>Hedef ve gerçekleşen</h3>
+        <div class="seg" role="group" aria-label="Ölçü"><button type="button" id="sgAdet" aria-pressed="true">Adet</button><button type="button" id="sgCiro" aria-pressed="false">Ciro</button></div>
+        <div class="seg" role="group" aria-label="Görünüm"><button type="button" id="sgMon" aria-pressed="true">Aylık</button><button type="button" id="sgCum" aria-pressed="false">Kümülatif</button></div>
+        <div class="legend"><span><i></i>Gerçekleşen</span><span><i class="plan"></i>Hedef</span></div>
+      </div>
+      <div class="chart-box" id="salesChart"></div>
+      <p class="card-note" id="salesNote"></p>
+    </div>
+    <div class="card">
+      <div class="card-h"><h3>Kasım: hedefe kalan</h3><span class="muted small" id="remDays"></span></div>
+      <div id="remain"></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-h"><h3>Yeni müşteri hattı</h3><span class="muted small">Beklenen hacim = aylık potansiyel × aşama olasılığı</span></div>
+    <div id="funnel"></div>
+  </div>
+  <div class="foot-row">
+    <span class="muted small">Ciro KDV hariçtir. Fiyat bantları ve hedefler örnektir.</span>
+    <button type="button" class="linkbtn" data-tgl aria-controls="chgDetail" aria-expanded="false" data-on="Detayı gizle" data-off="Detay: hacmi artan ve azalan müşteriler">Detay: hacmi artan ve azalan müşteriler</button>
+  </div>
+  <div class="grid-2 even" id="chgDetail" hidden>
+    <div class="card tbl-card"><div class="card-h"><h3>Hacmi artan müşteriler</h3><span class="muted small">Ekim, önceki 3 aya göre</span></div><div class="tbl-wrap"><table id="upTable"></table></div></div>
+    <div class="card tbl-card"><div class="card-h"><h3>Hacmi azalan müşteriler</h3><span class="muted small">Ekim, önceki 3 aya göre</span></div><div class="tbl-wrap"><table id="downTable"></table></div></div>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    <p class="contact">Ferhat Acıcı · +90 539 319 1299 (WhatsApp) · +966 55 271 5881 · sfa.ferhat@gmail.com</p>
+    <p class="foot-note">DHL eCommerce Bursa Şube Müdürü başvurusu için hazırlanmış örnek çalışmadır. Şirketin logosu, renkleri veya markaları kullanılmamıştır; müşteri adları, kurye adları ve bütün sayılar örnektir.</p>
+  </div>
+</footer>
+
+<!-- ================= Saf hesap fonksiyonları (DOM kullanmaz; testlerde doğrudan kullanılır) ================= -->
+<script id="calc">
+var Calc = (function () {
+  'use strict';
+
+  /* ---- Tohumlu rastgele sayı üreteci: her açılışta aynı örnek veri ---- */
+  function mulberry32(a) {
+    return function () {
+      a |= 0; a = (a + 0x6D2B79F5) | 0;
+      var t = Math.imul(a ^ (a >>> 15), 1 | a);
+      t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+  function hashStr(s) {
+    var h = 2166136261;
+    for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); }
+    return h >>> 0;
+  }
+  function hashFrac(s) { return mulberry32(hashStr(s))(); }
+  function gauss(key) {
+    var u1 = Math.max(1e-9, hashFrac(key + '|g1')), u2 = hashFrac(key + '|g2');
+    return Math.sqrt(-2 * Math.log(u1)) * Math.cos(2 * Math.PI * u2);
+  }
+  function poisson(lam, key) {
+    if (!(lam > 0)) { return 0; }
+    var r = mulberry32(hashStr(key)), L = Math.exp(-lam), k = 0, p = 1;
+    do { k++; p *= r(); } while (p > L && k < 500);
+    return k - 1;
+  }
+  function clamp(v, lo, hi) { return Math.max(lo, Math.min(hi, v)); }
+  function sum(a) { var s = 0; for (var i = 0; i < a.length; i++) { s += a[i]; } return s; }
+  function mean(a) { return a.length ? sum(a) / a.length : NaN; }
+  function sampleStd(a) {
+    if (a.length < 2) { return 0; }
+    var m = mean(a), s = 0;
+    a.forEach(function (x) { s += (x - m) * (x - m); });
+    return Math.sqrt(s / (a.length - 1));
+  }
+  function pctOf(n, d) { return d > 0 ? n / d * 100 : null; }
+  function permille(n, d) { return d > 0 ? n / d * 1000 : null; }
+  /* Tam sayı toplamı ağırlıklara göre böler; parçaların toplamı her zaman "total" olur (en büyük kalan yöntemi) */
+  function distribute(total, weights) {
+    var ws = sum(weights), raw = weights.map(function (w) { return ws > 0 ? total * w / ws : 0; });
+    var out = raw.map(Math.floor), rest = total - sum(out);
+    var order = raw.map(function (v, i) { return { i: i, f: v - Math.floor(v) }; }).sort(function (a, b) { return b.f - a.f || a.i - b.i; });
+    for (var k = 0; k < rest; k++) { out[order[k % order.length].i]++; }
+    return out;
+  }
+
+  /* ---- Tarih yardımcıları (UTC gün numarası; saat dilimi etkisi yok) ---- */
+  var DAY = 86400000;
+  function dayNum(iso) { var p = iso.split('-'); return Math.round(Date.UTC(+p[0], +p[1] - 1, +p[2]) / DAY); }
+  function isoOf(dn) { var d = new Date(dn * DAY); return d.getUTCFullYear() + '-' + String(d.getUTCMonth() + 1).padStart(2, '0') + '-' + String(d.getUTCDate()).padStart(2, '0'); }
+  function addDays(iso, n) { return isoOf(dayNum(iso) + n); }
+  function dow(iso) { return new Date(dayNum(iso) * DAY).getUTCDay(); }
+  var HOLIDAYS = {
+    '2026-01-01': 'Yılbaşı', '2026-03-20': 'Ramazan Bayramı', '2026-04-23': 'Ulusal Egemenlik ve Çocuk Bayramı', '2026-05-01': 'Emek ve Dayanışma Günü',
+    '2026-05-19': 'Gençlik ve Spor Bayramı', '2026-05-27': 'Kurban Bayramı', '2026-05-28': 'Kurban Bayramı', '2026-05-29': 'Kurban Bayramı',
+    '2026-07-15': 'Demokrasi ve Millî Birlik Günü', '2026-10-29': 'Cumhuriyet Bayramı'
+  };
+  function isWorkday(iso) { return dow(iso) !== 0 && !HOLIDAYS[iso]; }
+  function workdays(a, b) { var out = []; for (var d = dayNum(a); d <= dayNum(b); d++) { var iso = isoOf(d); if (isWorkday(iso)) { out.push(iso); } } return out; }
+  function monthOf(iso) { var p = iso.split('-'); return (+p[0] - 2026) * 12 + (+p[1] - 1); }
+  function monthStart(mi) { return '2026-' + String(mi + 1).padStart(2, '0') + '-01'; }
+  function monthEnd(mi) { var last = new Date(Date.UTC(2026, mi + 1, 0)).getUTCDate(); return '2026-' + String(mi + 1).padStart(2, '0') + '-' + String(last).padStart(2, '0'); }
+  function monthWorkdays(mi) { return workdays(monthStart(mi), monthEnd(mi)); }
+  function nextWorkday(iso) { var d = addDays(iso, 1); while (!isWorkday(d)) { d = addDays(d, 1); } return d; }
+
+  /* ---- Dönem: 12 tam hafta (17.08–07.11.2026) ve bugün 09.11.2026 Pazartesi ---- */
+  var REF = '2026-11-09', START = '2026-08-17';
+  var NEXT = nextWorkday(REF);
+  var DAYS = workdays(START, REF);
+  var MONTH_NAMES = ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran', 'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'];
+  var MONTH_SHORT = ['Oca', 'Şub', 'Mar', 'Nis', 'May', 'Haz', 'Tem', 'Ağu', 'Eyl', 'Eki', 'Kas', 'Ara'];
+  var DOW_NAMES = ['Pazar', 'Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi'];
+  var WEEKS = [];
+  for (var wk = 0; wk < 12; wk++) {
+    var ws = addDays(START, wk * 7);
+    WEEKS.push({ idx: wk, start: ws, end: addDays(ws, 5), days: workdays(ws, addDays(ws, 5)) });
+  }
+  var LAST24 = DAYS.slice(-24);
+
+  /* ---- Hedefler ---- */
+  var TARGETS = {
+    vol: { id: 'vol', name: 'Günlük dağıtım adedi', unit: 'adet', dir: 'band' },
+    onTime: { id: 'onTime', name: 'Zamanında teslim', unit: '%', dir: 'up', target: 92, warn: 2 },
+    fa: { id: 'fa', name: 'İlk denemede teslim', unit: '%', dir: 'up', target: 93, warn: 2 },
+    devir: { id: 'devir', name: 'Devir oranı', unit: '%', dir: 'down', target: 7, warn: 2 },
+    comp: { id: 'comp', name: 'Şikâyet oranı', unit: '‰', dir: 'down', target: 1.5, warn: 0.5 },
+    sales: { id: 'sales', name: 'Satış hedef gerçekleşme', unit: '%', dir: 'up', target: 100, warn: 5 },
+    resol: { id: 'resol', name: 'Ortalama çözüm süresi', unit: 'saat', dir: 'down', target: 24, warn: 12 }
+  };
+  function status(v, t) {
+    if (v == null || !isFinite(v)) { return 'na'; }
+    var gap = t.dir === 'up' ? t.target - v : v - t.target;
+    return gap <= 1e-9 ? 'good' : (gap <= t.warn + 1e-9 ? 'warn' : 'crit');
+  }
+  /* Hacim: plan bandının (P10–P90) içindeyse İyi; bandın %5 dışına kadar Dikkat; daha fazlası Kritik */
+  function bandStatus(v, p10, p90) {
+    if (v >= p10 && v <= p90) { return 'good'; }
+    var gap = v < p10 ? (p10 - v) / p10 : (v - p90) / p90;
+    return gap <= 0.05 ? 'warn' : 'crit';
+  }
+  var HOURS = { std: 8.5, sat: 6 };
+
+  /* ---- Bölgeler (yaklaşık mahalle merkezleri) ve kuryeler ---- */
+  var ZONES = [
+    { id: 'setbasi', no: 1, name: 'Setbaşı', ilce: 'Osmangazi', lat: 40.1836, lon: 29.0716, share: 0.08 },
+    { id: 'altiparmak', no: 2, name: 'Altıparmak', ilce: 'Osmangazi', lat: 40.1893, lon: 29.0540, share: 0.07 },
+    { id: 'demirtas', no: 3, name: 'Demirtaşpaşa', ilce: 'Osmangazi', lat: 40.1990, lon: 29.0745, share: 0.075 },
+    { id: 'kukurtlu', no: 4, name: 'Kükürtlü', ilce: 'Osmangazi', lat: 40.1968, lon: 29.0420, share: 0.07 },
+    { id: 'panayir', no: 5, name: 'Panayır', ilce: 'Osmangazi', lat: 40.2262, lon: 29.0428, share: 0.075 },
+    { id: 'fethiye', no: 6, name: 'Fethiye', ilce: 'Nilüfer', lat: 40.2120, lon: 28.9890, share: 0.14 },
+    { id: 'besevler', no: 7, name: 'Beşevler', ilce: 'Nilüfer', lat: 40.2190, lon: 28.9640, share: 0.07 },
+    { id: 'ihsaniye', no: 8, name: 'İhsaniye', ilce: 'Nilüfer', lat: 40.2070, lon: 29.0125, share: 0.075 },
+    { id: 'gorukle', no: 9, name: 'Görükle', ilce: 'Nilüfer', lat: 40.2312, lon: 28.8668, share: 0.14 },
+    { id: 'emirsultan', no: 10, name: 'Emirsultan', ilce: 'Yıldırım', lat: 40.1832, lon: 29.0880, share: 0.065 },
+    { id: 'mimarsinan', no: 11, name: 'Mimar Sinan', ilce: 'Yıldırım', lat: 40.2050, lon: 29.1130, share: 0.065 },
+    { id: 'degirmenonu', no: 12, name: 'Değirmenönü', ilce: 'Yıldırım', lat: 40.1885, lon: 29.1060, share: 0.075 }
+  ];
+  var ZONE = {}; ZONES.forEach(function (z) { ZONE[z.id] = z; });
+  var BRANCH = { name: 'Bursa Merkez Şube (örnek)', lat: 40.2095, lon: 29.0290 };
+  var CAT_DEF = { gec: 0.36, adres: 0.34, hasar: 0.14, davranis: 0.16 };
+  /* speed: saatte teslim kapasitesi; fa: ilk denemede teslim olasılığı; cr: teslim başına şikâyet olasılığı */
+  var COURIERS = [
+    { id: 'k01', name: 'Mehmet K.', zone: 'setbasi', veh: 'Motosiklet', speed: 14.0, fa: 0.950, cr: 0.0011 },
+    { id: 'k02', name: 'Emre T.', zone: 'altiparmak', veh: 'Motosiklet', speed: 13.6, fa: 0.945, cr: 0.0010 },
+    { id: 'k03', name: 'Hasan D.', zone: 'demirtas', veh: 'Panelvan', speed: 13.1, fa: 0.942, cr: 0.0012 },
+    { id: 'k04', name: 'Murat S.', zone: 'kukurtlu', veh: 'Panelvan', speed: 12.9, fa: 0.938, cr: 0.0013 },
+    { id: 'k05', name: 'Burak A.', zone: 'panayir', veh: 'Panelvan', speed: 13.4, fa: 0.958, cr: 0.0008 },
+    { id: 'k06', name: 'Okan Ç.', zone: 'fethiye', veh: 'Panelvan', speed: 13.2, fa: 0.947, cr: 0.0011 },
+    { id: 'k07', name: 'Serkan B.', zone: 'fethiye', veh: 'Panelvan', speed: 12.7, fa: 0.935, cr: 0.0024, cat: { gec: 0.22, adres: 0.24, hasar: 0.12, davranis: 0.42 } },
+    { id: 'k08', name: 'Yusuf E.', zone: 'besevler', veh: 'Panelvan', speed: 13.0, fa: 0.943, cr: 0.0011 },
+    { id: 'k09', name: 'Kemal Ö.', zone: 'ihsaniye', veh: 'Panelvan', speed: 13.2, fa: 0.945, cr: 0.0010 },
+    { id: 'k10', name: 'Tolga G.', zone: 'gorukle', veh: 'Panelvan', speed: 11.5, fa: 0.898, cr: 0.0014, cat: { gec: 0.30, adres: 0.50, hasar: 0.10, davranis: 0.10 } },
+    { id: 'k11', name: 'Ahmet U.', zone: 'gorukle', veh: 'Panelvan', speed: 11.8, fa: 0.906, cr: 0.0013, cat: { gec: 0.30, adres: 0.50, hasar: 0.10, davranis: 0.10 } },
+    { id: 'k12', name: 'Cengiz N.', zone: 'emirsultan', veh: 'Panelvan', speed: 12.8, fa: 0.941, cr: 0.0012 },
+    { id: 'k13', name: 'İbrahim H.', zone: 'mimarsinan', veh: 'Panelvan', speed: 12.0, fa: 0.922, cr: 0.0013 },
+    { id: 'k14', name: 'Ali Y.', zone: 'degirmenonu', veh: 'Panelvan', speed: 13.0, fa: 0.942, cr: 0.0011 }
+  ];
+  var COURIER = {}; COURIERS.forEach(function (c) { COURIER[c.id] = c; });
+  ZONES.forEach(function (z) { z.couriers = COURIERS.filter(function (c) { return c.zone === z.id; }).map(function (c) { return c.id; }); z.nC = z.couriers.length; });
+  var CATS = [
+    { id: 'gec', name: 'Geç teslim' }, { id: 'adres', name: 'Adreste bulunamadı' }, { id: 'hasar', name: 'Hasarlı gönderi' },
+    { id: 'davranis', name: 'Kurye davranışı' }, { id: 'cagri', name: 'Çağrı merkezi' }
+  ];
+
+  /* ---- Kurumsal müşteriler: [id, ad, bölge, fiyat bandı, aylık taban hacim, profil, son ziyaretten geçen gün] ---- */
+  var CUSTOMER_ROWS = [
+    ['c01', 'Nilüfer Tekstil (örnek)', 'fethiye', 'A', 3400, 'stable', 21],
+    ['c02', 'Osmangazi Yedek Parça (örnek)', 'panayir', 'A', 2900, 'drop', 68],
+    ['c03', 'Fethiye Kozmetik (örnek)', 'fethiye', 'B', 1700, 'grow', 14],
+    ['c04', 'Kükürtlü Ev Tekstili (örnek)', 'kukurtlu', 'A', 2300, 'slow', 47],
+    ['c05', 'Beşevler Elektronik (örnek)', 'besevler', 'B', 1250, 'stable', 35],
+    ['c06', 'Panayır Mobilya Aksesuar (örnek)', 'panayir', 'B', 1100, 'grow', 9],
+    ['c07', 'Yıldırım Bebe Giyim (örnek)', 'emirsultan', 'B', 980, 'drop', 96],
+    ['c08', 'İhsaniye Spor Malzemeleri (örnek)', 'ihsaniye', 'B', 870, 'stable', 28],
+    ['c09', 'Demirtaş Oto Aksesuar (örnek)', 'demirtas', 'B', 820, 'grow', 40],
+    ['c10', 'Setbaşı Kitabevi (örnek)', 'setbasi', 'C', 640, 'stable', 55],
+    ['c11', 'Altıparmak Kuruyemiş (örnek)', 'altiparmak', 'C', 590, 'slow', 81],
+    ['c12', 'Emirsultan Havlu Bornoz (örnek)', 'emirsultan', 'B', 760, 'stable', 33],
+    ['c13', 'Görükle Kırtasiye (örnek)', 'gorukle', 'C', 420, 'grow', 62],
+    ['c14', 'Mimar Sinan Ayakkabı (örnek)', 'mimarsinan', 'C', 530, 'drop', 112],
+    ['c15', 'Değirmenönü Hırdavat (örnek)', 'degirmenonu', 'C', 480, 'stable', 74],
+    ['c16', 'Bursa Örme Kumaş (örnek)', 'panayir', 'A', 1500, 'stable', 18],
+    ['c17', 'Merkez Çanta Deri (örnek)', 'setbasi', 'C', 450, 'slow', 59],
+    ['c18', 'Sanayi Filtre Parça (örnek)', 'panayir', 'B', 700, 'stable', 26],
+    ['c19', 'Ova Gıda Paketleme (örnek)', 'mimarsinan', 'C', 380, 'grow', 44],
+    ['c20', 'Çınar Ev Gereçleri (örnek)', 'ihsaniye', 'C', 510, 'stable', 90],
+    ['c21', 'Atölye Takı Tasarım (örnek)', 'fethiye', 'C', 340, 'grow', 12],
+    ['c22', 'Kent Medikal Sarf (örnek)', 'demirtas', 'B', 620, 'stable', 38],
+    ['c23', 'Doğa Bitkisel Ürünler (örnek)', 'besevler', 'C', 410, 'slow', 66],
+    ['c24', 'Kuzey Pet Mama (örnek)', 'degirmenonu', 'C', 560, 'grow', 23],
+    ['c25', 'Liman Perde Tül (örnek)', 'kukurtlu', 'C', 390, 'stable', 52]
+  ];
+  /* Fiyat bandı: gönderi başına ortalama fiyat (TL, KDV hariç); Temmuz 2026 tarife artışıyla ikinci değer geçerlidir */
+  var BANDS = { A: { name: 'A · yüksek hacim', h1: 92, h2: 106 }, B: { name: 'B · orta hacim', h1: 108, h2: 124 }, C: { name: 'C · düşük hacim', h1: 126, h2: 145 } };
+  var IND_PRICE = { h1: 215, h2: 248 };
+  function priceOf(band, m) { return m >= 6 ? BANDS[band].h2 : BANDS[band].h1; }
+  function indPrice(m) { return m >= 6 ? IND_PRICE.h2 : IND_PRICE.h1; }
+  /* Gerçekleşen mevsimsellik (Ocak–Kasım) ve bütçe hazırlanırken öngörülen mevsimsellik */
+  var SEAS = [0.93, 0.90, 0.97, 0.96, 0.99, 0.95, 0.94, 0.92, 1.00, 1.05, 1.10];
+  var T_SEAS = [0.92, 0.90, 0.98, 0.97, 1.00, 0.97, 0.95, 0.94, 1.00, 1.05, 1.12];
+  var T_PRICE = { h1: 116, h2: 133 };
+  function profF(p, m) {
+    if (p === 'grow') { return 1 + 0.03 * m; }
+    if (p === 'slow') { return 1 - 0.015 * m; }
+    if (p === 'drop') { return m <= 7 ? 1 : (m === 8 ? 0.84 : (m === 9 ? 0.70 : 0.66)); }
+    return 1;
+  }
+  /* Bütçe (Aralık 2025'te hazırlanmış): aylık gönderi ve ciro hedefi */
+  var TARGET_ADET = [], TARGET_CIRO = [];
+  for (var tm = 0; tm <= 10; tm++) {
+    var ta = Math.round(27600 * T_SEAS[tm] * (1 + 0.005 * tm) / 100) * 100;
+    TARGET_ADET.push(ta);
+    TARGET_CIRO.push(ta * (tm >= 6 ? T_PRICE.h2 : T_PRICE.h1));
+  }
+
+  /* ---- Yeni müşteri hattı ---- */
+  var STAGES = [
+    { id: 'potansiyel', name: 'Potansiyel', p: 0.10 }, { id: 'ziyaret', name: 'Ziyaret edildi', p: 0.25 }, { id: 'teklif', name: 'Teklif', p: 0.50 },
+    { id: 'kazanildi', name: 'Kazanıldı', p: 1.00 }, { id: 'kaybedildi', name: 'Kaybedildi', p: 0 }
+  ];
+  var PIPE = [
+    ['Kestel Mobilya Atölyesi (örnek)', 'teklif', 900, 'Fiyat teklifi görüşmesi', '2026-11-12'],
+    ['Gürsu Tekstil Baskı (örnek)', 'ziyaret', 650, 'Numune gönderimi', '2026-11-13'],
+    ['Hamitler Plastik Ambalaj (örnek)', 'potansiyel', 1200, 'İlk ziyaret randevusu', '2026-11-16'],
+    ['Çekirge Butik Giyim (örnek)', 'kazanildi', 420, 'Entegrasyon ve ilk gönderi', '2026-11-11'],
+    ['Ertuğrul Ofis Malzemeleri (örnek)', 'teklif', 540, 'Sözleşme taslağı', '2026-11-17'],
+    ['Soğanlı Elektrik Malzeme (örnek)', 'potansiyel', 480, 'İlk ziyaret randevusu', '2026-11-18'],
+    ['Nilüfer Organik Gıda (örnek)', 'ziyaret', 380, 'İhtiyaç analizi', '2026-11-12'],
+    ['Hürriyet Oyuncak (örnek)', 'teklif', 760, 'Kasım kampanyası için hacim teyidi', '2026-11-10'],
+    ['Yenişehir Bal Ürünleri (örnek)', 'kaybedildi', 300, 'Rakip fiyatı tercih edildi', '2026-10-28'],
+    ['Görükle Öğrenci Kırtasiye (örnek)', 'potansiyel', 250, 'Telefonla ilk görüşme', '2026-11-19'],
+    ['Kayapa Sanayi Rulman (örnek)', 'ziyaret', 520, 'Teknik ihtiyaç görüşmesi', '2026-11-14'],
+    ['Mudanya Yolu Ev Dekor (örnek)', 'kazanildi', 610, 'İlk ay hacim takibi', '2026-11-20']
+  ];
+
+  /* ---- Saf hesaplar (testlerde doğrudan doğrulanır) ---- */
+  /* Tahmin bandı: P50 = ortalama × trend; P10/P90 = P50 × (1 ∓ 1,2816 × s); s = oranların örneklem standart sapması (en az 0,04) */
+  var Z90 = 1.2816, S_MIN = 0.04;
+  function forecastBand(vals, trend) {
+    var m = mean(vals);
+    var s = Math.max(S_MIN, sampleStd(vals.map(function (v) { return m > 0 ? v / m : 1; })));
+    var p50 = m * trend;
+    return { mean: m, trend: trend, s: s, p10: p50 * (1 - Z90 * s), p50: p50, p90: p50 * (1 + Z90 * s) };
+  }
+  /* Trend katsayısı = son 12 iş gününün ortalaması ÷ önceki 12 iş gününün ortalaması (0,90–1,15 aralığında) */
+  function trendFactor(series) {
+    var a = series.slice(-12), b = series.slice(-24, -12);
+    if (a.length < 12 || b.length < 12) { return 1; }
+    return clamp(mean(a) / mean(b), 0.90, 1.15);
+  }
+  function couriersNeeded(forecast, tph, hours) { return tph > 0 && hours > 0 ? forecast / (tph * hours) : null; }
+  function riskParts(dropPct, open, days) {
+    return { hacim: clamp(Math.max(0, dropPct) * 4, 0, 100), sikayet: clamp(open / 3 * 100, 0, 100), ziyaret: clamp(days / 90 * 100, 0, 100) };
+  }
+  function riskScore(dropPct, open, days) { var p = riskParts(dropPct, open, days); return 0.5 * p.hacim + 0.3 * p.sikayet + 0.2 * p.ziyaret; }
+  function remainingToTarget(target, done, elapsedDays, remainingDays) {
+    var kalan = Math.max(0, target - done);
+    var gereken = remainingDays > 0 ? kalan / remainingDays : null;
+    var mevcut = elapsedDays > 0 ? done / elapsedDays : null;
+    return { kalan: kalan, gereken: gereken, mevcut: mevcut, artis: gereken != null && mevcut > 0 ? (gereken / mevcut - 1) * 100 : null };
+  }
+  /* Ne olursa: kapasite = kurye × teslim/saat × saat; beklenen teslim = en az(kapasite, dağıtıma çıkacak × teslim oranı) */
+  function whatIf(o) {
+    var cap = o.kurye * o.tph * o.saat, out = o.gonderi + o.devirIn;
+    var pot = out * o.basari, tes = Math.min(cap, pot), dv = out - tes;
+    return { cap: cap, out: out, pot: pot, teslim: tes, devir: dv, oran: pctOf(dv, out) };
+  }
+  /* Türkçe sayı girişi: virgül ondalık, nokta binlik ayırıcıdır ("1.800" = 1800, "1.800,50" = 1800,5). */
+  function parseNum(str, kind) {
+    var s = String(str == null ? '' : str).trim().replace(/\s+/g, '');
+    if (s === '') { return NaN; }
+    var neg = s.charAt(0) === '-' || s.charAt(0) === '−';
+    if (neg) { s = s.slice(1); }
+    if (s.indexOf(',') >= 0) {
+      if (!/^\d{1,3}(\.\d{3})*,\d+$/.test(s) && !/^\d+,\d+$/.test(s)) { return NaN; }
+      s = s.replace(/\./g, '').replace(',', '.');
+    } else if (/^[1-9]\d{0,2}(\.\d{3})+$/.test(s)) {
+      s = s.replace(/\./g, '');
+    } else if (kind === 'int' && s.indexOf('.') >= 0) {
+      return NaN;
+    }
+    if (!/^\d+(\.\d+)?$/.test(s)) { return NaN; }
+    var v = neg ? -Number(s) : Number(s);
+    if (kind === 'int' && v % 1 !== 0) { return NaN; }
+    return v;
+  }
+  function niceNum(range, round) {
+    var exp = Math.floor(Math.log10(range));
+    var f = range / Math.pow(10, exp), nf;
+    if (round) { nf = f < 1.5 ? 1 : f < 3 ? 2 : f < 7 ? 5 : 10; }
+    else { nf = f <= 1 ? 1 : f <= 2 ? 2 : f <= 5 ? 5 : 10; }
+    return nf * Math.pow(10, exp);
+  }
+  function niceScale(min, max, ticks) {
+    if (!(max > min)) { var pad = Math.abs(min) > 0 ? Math.abs(min) * 0.1 : 1; min -= pad; max += pad; }
+    var range = niceNum(max - min, false);
+    var step = niceNum(range / (ticks - 1), true);
+    var lo = Math.floor(min / step) * step, hi = Math.ceil(max / step) * step;
+    var n = Math.round((hi - lo) / step), vals = [];
+    for (var i = 0; i <= n; i++) { vals.push(Number((lo + i * step).toPrecision(12))); }
+    return { lo: vals[0], hi: vals[vals.length - 1], step: step, ticks: vals };
+  }
+
+  /* ---- Örnek veri üretimi ---- */
+  var WD = [0, 1.10, 1.06, 1.02, 1.00, 0.97, 0.70];      /* gelen hacim, haftanın günü katsayısı (Pzt–Cmt) */
+  var KWD = [0, 1.06, 1.05, 1.03, 1.02, 1.00, 0.55];     /* kabul (çıkış) hacmi */
+  var AFTER_HOLIDAY = { '2026-10-30': 1.16 };
+  var CAMPAIGN_FROM = '2026-11-02';                      /* Kasım kampanya dönemi: e-ticaret hacmi artar */
+  function levelOf(iso) {
+    var k = (dayNum(iso) - dayNum(START)) / 7;
+    return 1180 * (1 + 0.009 * k) * (iso >= CAMPAIGN_FROM ? 1.045 : 1);
+  }
+  var FIELDS = ['G', 'cin', 'D', 'att', 'attC', 'first', 'second', 'teslim', 'iade', 'devir', 'G1', 'G2', 'att1', 'att2', 'first1', 'first2', 'teslim1', 'teslim2', 'devir1', 'devir2', 'hours', 'hw', 'comp', 'hasar'];
+  var DATA = null;
+
+  function buildCustomers() {
+    var cust = CUSTOMER_ROWS.map(function (a) {
+      return { id: a[0], name: a[1], zone: a[2], band: a[3], base: a[4], prof: a[5], visitDays: a[6], lastVisit: addDays(REF, -a[6]), vol: [] };
+    });
+    cust.forEach(function (c) {
+      for (var m = 0; m <= 10; m++) { c.vol.push(Math.round(c.base * SEAS[m] * profF(c.prof, m) * (1 + 0.04 * gauss(c.id + '|m' + m)))); }
+      var prev3 = (c.vol[6] + c.vol[7] + c.vol[8]) / 3;
+      c.prev3 = prev3; c.oct = c.vol[9];
+      c.chg = (c.oct - prev3) / prev3 * 100;
+      c.drop = Math.max(0, -c.chg);
+    });
+    return cust;
+  }
+  function buildSales(cust) {
+    var ind = [], months = [];
+    for (var m = 0; m <= 10; m++) { ind.push(Math.round(3400 * SEAS[m] * (1 + 0.006 * m) * (1 + 0.03 * gauss('ind|' + m)))); }
+    for (m = 0; m <= 10; m++) {
+      var corp = 0, corpCiro = 0;
+      cust.forEach(function (c) { corp += c.vol[m]; corpCiro += c.vol[m] * priceOf(c.band, m); });
+      months.push({ m: m, corp: corp, ind: ind[m], adet: corp + ind[m], corpCiro: corpCiro, ciro: corpCiro + ind[m] * indPrice(m), corpPrice: corpCiro / corp });
+    }
+    /* Ağustos–Ekim: aylık toplamlar iş günlerine dağıtılır (gün toplamı = ay toplamı) */
+    var KAB = {};
+    for (m = 7; m <= 9; m++) {
+      var wds = monthWorkdays(m);
+      var w1 = wds.map(function (iso) { return KWD[dow(iso)] * (1 + 0.05 * gauss('kw|' + iso)); });
+      var w2 = wds.map(function (iso) { return KWD[dow(iso)] * (1 + 0.08 * gauss('ki|' + iso)); });
+      var cd = distribute(months[m].corp, w1), idd = distribute(months[m].ind, w2);
+      wds.forEach(function (iso, i) { KAB[iso] = { corp: cd[i], ind: idd[i], adet: cd[i] + idd[i], ciro: cd[i] * months[m].corpPrice + idd[i] * indPrice(m) }; });
+    }
+    /* Kasım: ayın beklenen hacmi günlere oranlanır; yalnızca bugüne kadarki günler gerçekleşmiştir */
+    var nov = monthWorkdays(10), wsum = sum(nov.map(function (iso) { return KWD[dow(iso)]; }));
+    nov.forEach(function (iso) {
+      if (iso > REF) { return; }
+      var f = KWD[dow(iso)] / wsum;
+      var c = Math.round(months[10].corp * f * (1 + 0.05 * gauss('kn|' + iso))), d = Math.round(months[10].ind * f * (1 + 0.08 * gauss('kin|' + iso)));
+      KAB[iso] = { corp: c, ind: d, adet: c + d, ciro: c * months[10].corpPrice + d * indPrice(10) };
+    });
+    return { months: months, KAB: KAB };
+  }
+  function pickCustomer(cust, u) {
+    var w = cust.map(function (c) { return c.vol[9] * (c.prof === 'drop' ? 4 : 1); }), s = sum(w), acc = 0;
+    for (var i = 0; i < cust.length; i++) { acc += w[i] / s; if (u < acc) { return cust[i].id; } }
+    return cust[cust.length - 1].id;
+  }
+  function pickCat(weights, u) {
+    var acc = 0, keys = Object.keys(weights);
+    for (var i = 0; i < keys.length; i++) { acc += weights[keys[i]]; if (u < acc) { return keys[i]; } }
+    return keys[keys.length - 1];
+  }
+  var NOW_H = dayNum(REF) * 24 + 19; /* gün sonu: 09.11.2026 saat 19:00 */
+  function makeComplaint(iso, c, k, cust) {
+    var key = 'cmp|' + iso + '|' + (c ? c.id : 'cc') + '|' + k;
+    var cat = c ? pickCat(c.cat || CAT_DEF, hashFrac(key + '|cat')) : 'cagri';
+    var cu = hashFrac(key + '|cu') < 0.42 ? pickCustomer(cust, hashFrac(key + '|cw')) : null;
+    var hour = 9 + Math.floor(hashFrac(key + '|hr') * 10);
+    var res = Math.exp(Math.log(12) + 0.6 * gauss(key + '|r'));
+    if (hashFrac(key + '|st') < 0.12) { res *= 6 + 6 * hashFrac(key + '|sm'); }
+    res = clamp(res, 1.5, 400);
+    var created = dayNum(iso) * 24 + hour, open = created + res > NOW_H;
+    return { iso: iso, hour: hour, cat: cat, courier: c ? c.id : null, zone: c ? c.zone : null, cust: cu,
+      res: open ? null : Math.round(res * 10) / 10, closedIso: open ? null : isoOf(Math.floor((created + res) / 24)), open: open,
+      ageDays: open ? Math.floor((NOW_H - created) / 24) : null };
+  }
+  function simulate(cust) {
+    var carry = {}, REC = {}, COMPL = [];
+    COURIERS.forEach(function (c) { var z = ZONE[c.zone]; carry[c.id] = Math.round(levelOf(START) * z.share / z.nC * 0.06); });
+    DAYS.forEach(function (iso) {
+      var w = dow(iso), hours = w === 6 ? HOURS.sat : HOURS.std;
+      var tot = levelOf(iso) * WD[w] * (AFTER_HOLIDAY[iso] || 1) * (1 + 0.03 * gauss('day|' + iso));
+      var day = { iso: iso, hours: hours, c: {}, cc: 0, tot: tot };
+      var tTes = 0;
+      COURIERS.forEach(function (c) {
+        var z = ZONE[c.zone], key = c.id + '|' + iso;
+        var G = Math.max(0, Math.round(tot * z.share / z.nC * (1 + 0.05 * gauss(key + '|g'))));
+        var cin = carry[c.id], D = G + cin;
+        var sp = c.speed * (1 + 0.035 * gauss(key + '|s'));
+        var cap = Math.floor(sp * hours);                              /* günlük teslim kapasitesi */
+        var fa = clamp(c.fa + 0.012 * gauss(key + '|f'), 0.75, 0.99);
+        /* Devreden gönderiler önce (1. turda) denenir; %5'i göndericiye iade edilir, denenenlerin %90'ı teslim edilir */
+        var iade = Math.floor(cin * 0.05), carryAvail = cin - iade;
+        var secondPot = Math.round(carryAvail * 0.9), second = Math.min(secondPot, cap);
+        var attC = second === secondPot ? carryAvail : Math.min(carryAvail, Math.ceil(second / 0.9));
+        /* Yeni gönderiler: kapasite yetmezse bir kısmı hiç denenmeden ertesi güne devreder */
+        var capLeft = cap - second, firstPot = Math.round(G * fa), first, att;
+        if (firstPot <= capLeft) { first = firstPot; att = G; }
+        else { first = Math.max(0, capLeft); att = Math.min(G, Math.ceil(first / fa)); }
+        var teslim = first + second, devir = D - teslim - iade;
+        var G1 = Math.round(G * 0.58), G2 = G - G1;
+        var att1 = Math.min(G1, att), att2 = att - att1;
+        var first1 = Math.min(att1, Math.round(first * (att > 0 ? att1 / att : 0) * 1.01)), first2 = first - first1;
+        if (first2 > att2) { first1 += first2 - att2; first2 = att2; }
+        var devir2 = G2 - first2;
+        var hw = Math.min(hours, Math.round((teslim / sp + 0.4) * 10) / 10);
+        var nComp = poisson(teslim * c.cr, key + '|c');
+        var r = { G: G, cin: cin, D: D, att: att, attC: attC, first: first, second: second, teslim: teslim, iade: iade, devir: devir, G1: G1, G2: G2,
+          att1: att1, att2: att2, first1: first1, first2: first2, teslim1: first1 + second, teslim2: first2, devir1: devir - devir2, devir2: devir2,
+          hours: hours, hw: hw, comp: nComp, hasar: poisson(teslim * 0.00035, key + '|h') };
+        for (var j = 0; j < nComp; j++) { COMPL.push(makeComplaint(iso, c, j, cust)); }
+        carry[c.id] = devir;
+        day.c[c.id] = r;
+        tTes += teslim;
+      });
+      day.cc = poisson(tTes * 0.00016, 'cc|' + iso);
+      for (var j = 0; j < day.cc; j++) { COMPL.push(makeComplaint(iso, null, j, cust)); }
+      REC[iso] = day;
+    });
+    COMPL.forEach(function (x, i) { x.id = 'Ş-' + String(1001 + i); });
+    return { REC: REC, COMPL: COMPL };
+  }
+  function build() {
+    if (DATA) { return DATA; }
+    var cust = buildCustomers();
+    var sales = buildSales(cust);
+    var sim = simulate(cust);
+    cust.forEach(function (c) { c.open = sim.COMPL.filter(function (x) { return x.open && x.cust === c.id; }).length; });
+    cust.forEach(function (c) { c.parts = riskParts(c.drop, c.open, c.visitDays); c.risk = riskScore(c.drop, c.open, c.visitDays); });
+    DATA = { cust: cust, months: sales.months, KAB: sales.KAB, REC: sim.REC, COMPL: sim.COMPL };
+    return DATA;
+  }
+
+  /* ---- Toplama ---- */
+  function agg(isos, filter) {
+    var D = build(), s = { days: 0, cdays: 0, cc: 0 };
+    FIELDS.forEach(function (f) { s[f] = 0; });
+    isos.forEach(function (iso) {
+      var day = D.REC[iso]; if (!day) { return; }
+      s.days++;
+      COURIERS.forEach(function (c) {
+        if (filter && !filter(c)) { return; }
+        var r = day.c[c.id]; FIELDS.forEach(function (f) { s[f] += r[f]; }); s.cdays++;
+      });
+      if (!filter) { s.cc += day.cc; }
+    });
+    s.compAll = s.comp + s.cc;
+    return s;
+  }
+  function ratios(s) {
+    return { vol: s.days ? s.G / s.days : null, onTime: pctOf(s.teslim, s.D), fa: pctOf(s.first, s.att), devir: pctOf(s.devir, s.D),
+      comp: permille(s.compAll, s.teslim), compC: permille(s.comp, s.teslim), tph: s.hw > 0 ? s.teslim / s.hw : null,
+      succ: pctOf(s.teslim, s.att + s.attC) };
+  }
+  function zoneG(zid, iso) { var day = build().REC[iso], s = 0; ZONE[zid].couriers.forEach(function (id) { s += day.c[id].G; }); return s; }
+  function branchG(iso) { var day = build().REC[iso], s = 0; COURIERS.forEach(function (c) { s += day.c[c.id].G; }); return s; }
+  /* Hedef günün haftanın aynı gününe denk gelen son n iş günü (asOf dahil, bayramlar atlanır) */
+  function sameWeekdayDays(targetIso, asOf, n) {
+    var w = dow(targetIso), out = [];
+    for (var i = DAYS.length - 1; i >= 0 && out.length < n; i--) { if (DAYS[i] <= asOf && dow(DAYS[i]) === w) { out.push(DAYS[i]); } }
+    return out;
+  }
+  function planFor(targetIso, asOf) {
+    var hist = DAYS.filter(function (d) { return d <= asOf; });
+    var trend = trendFactor(hist.map(branchG));
+    var days = sameWeekdayDays(targetIso, asOf, 4);
+    var zones = ZONES.map(function (z) { var vals = days.map(function (d) { return zoneG(z.id, d); }); return { z: z, vals: vals, band: forecastBand(vals, trend) }; });
+    var bVals = days.map(branchG);
+    var last12 = hist.slice(-12), prev12 = hist.slice(-24, -12);
+    return { target: targetIso, asOf: asOf, trend: trend, days: days, zones: zones, branch: { vals: bVals, band: forecastBand(bVals, trend) },
+      trendIn: { a: mean(last12.map(branchG)), b: mean(prev12.map(branchG)), aFrom: last12[0], aTo: last12[last12.length - 1], bFrom: prev12[0], bTo: prev12[prev12.length - 1] } };
+  }
+  /* ---- Satış ---- */
+  function mtd(iso) {
+    var D = build(), mi = monthOf(iso), s = { adet: 0, ciro: 0, days: 0 };
+    monthWorkdays(mi).forEach(function (d) { if (d <= iso && D.KAB[d]) { s.adet += D.KAB[d].adet; s.ciro += D.KAB[d].ciro; s.days++; } });
+    s.total = monthWorkdays(mi).length; s.m = mi;
+    return s;
+  }
+  function salesPct(iso) { var s = mtd(iso); return pctOf(s.ciro, TARGET_CIRO[s.m] * s.days / s.total); }
+  function salesPctRange(isos) {
+    var D = build(), act = 0, tgt = 0;
+    isos.forEach(function (d) { if (!D.KAB[d]) { return; } var mi = monthOf(d); act += D.KAB[d].ciro; tgt += TARGET_CIRO[mi] / monthWorkdays(mi).length; });
+    return pctOf(act, tgt);
+  }
+
+  return {
+    mulberry32: mulberry32, hashFrac: hashFrac, gauss: gauss, poisson: poisson, sum: sum, mean: mean, sampleStd: sampleStd, pctOf: pctOf, permille: permille, distribute: distribute,
+    dayNum: dayNum, isoOf: isoOf, addDays: addDays, dow: dow, isWorkday: isWorkday, workdays: workdays, monthOf: monthOf, monthWorkdays: monthWorkdays, nextWorkday: nextWorkday,
+    REF: REF, START: START, NEXT: NEXT, DAYS: DAYS, WEEKS: WEEKS, LAST24: LAST24, HOLIDAYS: HOLIDAYS, MONTH_NAMES: MONTH_NAMES, MONTH_SHORT: MONTH_SHORT, DOW_NAMES: DOW_NAMES,
+    TARGETS: TARGETS, HOURS: HOURS, ZONES: ZONES, ZONE: ZONE, BRANCH: BRANCH, COURIERS: COURIERS, COURIER: COURIER, CATS: CATS, BANDS: BANDS, STAGES: STAGES, PIPE: PIPE,
+    TARGET_ADET: TARGET_ADET, TARGET_CIRO: TARGET_CIRO, FIELDS: FIELDS, Z90: Z90, S_MIN: S_MIN,
+    status: status, bandStatus: bandStatus, forecastBand: forecastBand, trendFactor: trendFactor, couriersNeeded: couriersNeeded, riskParts: riskParts, riskScore: riskScore,
+    remainingToTarget: remainingToTarget, whatIf: whatIf, parseNum: parseNum, niceScale: niceScale,
+    build: build, agg: agg, ratios: ratios, zoneG: zoneG, branchG: branchG, sameWeekdayDays: sameWeekdayDays, planFor: planFor, mtd: mtd, salesPct: salesPct, salesPctRange: salesPctRange
+  };
+})();
+if (typeof module !== 'undefined' && module.exports) { module.exports = Calc; }
+</script>
+
+<!-- ================= Arayüz ================= -->
+<script id="app">
+(function () {
+  'use strict';
+  var C = Calc;
+  var D = C.build();
+  var T = C.TARGETS;
+  var REF = C.REF, NEXT = C.NEXT;
+  var PREV_WEEK = C.addDays(REF, -7);
+  var STATUS_TXT = { good: 'İyi', warn: 'Dikkat', crit: 'Kritik', na: 'Veri yok' };
+
+  /* ---------- Biçimlendirme ---------- */
+  var NF = {};
+  function nf(d) { if (!NF[d]) { NF[d] = new Intl.NumberFormat('tr-TR', { minimumFractionDigits: d, maximumFractionDigits: d }); } return NF[d]; }
+  function n0(v) { return nf(0).format(Math.round(v)); }
+  function nd(v, d) { return nf(d).format(v); }
+  function pct(v, d) { if (v == null || !isFinite(v)) { return '—'; } d = d == null ? 1 : d; return (v < 0 ? '−' : '') + '%' + nf(d).format(Math.abs(v)); }
+  function pm(v) { return v == null || !isFinite(v) ? '—' : nd(v, 2) + '‰'; }
+  function mnTL(v, d) { return nd(v / 1e6, d == null ? 2 : d) + ' mn TL'; }
+  function signedPct(v) { return (v > 0 ? '+' : v < 0 ? '−' : '') + '%' + nd(Math.abs(v), 1); }
+  function fmtDate(iso) { var p = iso.split('-'); return p[2] + '.' + p[1] + '.' + p[0]; }
+  function fmtShort(iso) { var p = iso.split('-'); return p[2] + '.' + p[1]; }
+  function dayLabel(iso) { return fmtDate(iso) + ' ' + C.DOW_NAMES[C.dow(iso)]; }
+  function esc(s) { return String(s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+  function $(id) { return document.getElementById(id); }
+  function chip(cls, txt) { return '<span class="chip ' + cls + '">' + esc(txt) + '</span>'; }
+  function fmtVal(k, v) {
+    if (v == null || !isFinite(v)) { return '—'; }
+    if (k === 'vol') { return n0(v); }
+    if (k === 'comp') { return pm(v); }
+    return pct(v, 1);
+  }
+  function valHtml(k, v) {
+    if (v == null || !isFinite(v)) { return '—'; }
+    if (k === 'vol') { return esc(n0(v)) + '<span class="u">gönderi</span>'; }
+    if (k === 'comp') { return esc(nd(v, 2)) + '<span class="u">‰</span>'; }
+    return esc(pct(v, 1));
+  }
+  function targetTxt(k) { var t = T[k]; return (t.dir === 'up' ? '≥ ' : '≤ ') + fmtVal(k, t.target); }
+  /* Gösterge kartı: değer, karşılaştırma, durum çipi ve her zaman görünen formül satırı */
+  function tile(o) {
+    return '<article class="kpi" id="' + o.id + '"><div class="kpi-top"><h3>' + esc(o.title) + '</h3>' + (o.chip || '') + '</div>' +
+      '<div class="kpi-val">' + o.val + '</div>' + (o.foot ? '<div class="kpi-foot">' + o.foot + '</div>' : '') +
+      '<p class="kf"><span class="kf-l">Formül</span>' + esc(o.formula) + (o.calc ? '<span class="kf-c">' + esc(o.calc) + '</span>' : '') + '</p></article>';
+  }
+
+  /* ---------- Durum ve tema ---------- */
+  var STORE_KEY = 'sube-operasyon-paneli-v1';
+  var State = { theme: null, trendKpi: 'onTime', salesCiro: false, salesCum: false };
+  function loadState() {
+    var raw = null;
+    try { raw = window.localStorage.getItem(STORE_KEY); } catch (e) { raw = null; }
+    if (!raw) { return; }
+    var s; try { s = JSON.parse(raw); } catch (e) { return; }
+    if (!s || typeof s !== 'object') { return; }
+    if (s.theme === 'light' || s.theme === 'dark') { State.theme = s.theme; }
+    if (s.trendKpi && T[s.trendKpi] && s.trendKpi !== 'resol') { State.trendKpi = s.trendKpi; }
+  }
+  function saveState() {
+    try { window.localStorage.setItem(STORE_KEY, JSON.stringify({ theme: State.theme, trendKpi: State.trendKpi })); }
+    catch (e) { /* Depolama kapalı olabilir; panel yine çalışır. */ }
+  }
+  var mq = window.matchMedia ? window.matchMedia('(prefers-color-scheme: dark)') : null;
+  function effectiveDark() { return State.theme ? State.theme === 'dark' : !!(mq && mq.matches); }
+  function applyTheme() {
+    if (State.theme) { document.documentElement.setAttribute('data-theme', State.theme); }
+    else { document.documentElement.removeAttribute('data-theme'); }
+    var dark = effectiveDark(), b = $('themeBtn');
+    b.textContent = dark ? 'Açık tema' : 'Koyu tema';
+    b.setAttribute('aria-pressed', dark ? 'true' : 'false');
+    b.setAttribute('aria-label', dark ? 'Açık temaya geç' : 'Koyu temaya geç');
+  }
+
+  /* ---------- SVG çizgi grafik ---------- */
+  function lineChart(el, cfg) {
+    var W = Math.floor(el.clientWidth || 0);
+    if (W < 10) { return; }
+    W = Math.max(260, W);
+    var H = cfg.height || (W < 520 ? 210 : 240);
+    var pl = W < 520 ? 50 : 62, pr = 14, pt = 14, pb = 30;
+    var vals = [];
+    cfg.series.forEach(function (s) { s.values.forEach(function (v) { if (v != null && isFinite(v)) { vals.push(v); } }); });
+    if (cfg.target != null && isFinite(cfg.target)) { vals.push(cfg.target); }
+    if (!vals.length) { el.innerHTML = '<p class="muted">Grafik için veri yok.</p>'; return; }
+    var mnv = Math.min.apply(null, vals), mxv = Math.max.apply(null, vals);
+    if (cfg.yZero) { mnv = Math.min(0, mnv); }
+    var sc = C.niceScale(mnv, mxv, 5);
+    var n = cfg.labels.length, iw = W - pl - pr, ih = H - pt - pb;
+    function x(i) { return pl + (n === 1 ? iw / 2 : i * iw / (n - 1)); }
+    function y(v) { return pt + ih - (v - sc.lo) / (sc.hi - sc.lo) * ih; }
+    var s = '<svg class="chart" width="' + W + '" height="' + H + '" viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="' + esc(cfg.aria) + '">';
+    sc.ticks.forEach(function (t) {
+      var yy = y(t).toFixed(1);
+      s += '<line class="ch-grid" x1="' + pl + '" x2="' + (pl + iw) + '" y1="' + yy + '" y2="' + yy + '"/>';
+      s += '<text class="ch-txt" x="' + (pl - 6) + '" y="' + yy + '" text-anchor="end" dominant-baseline="middle">' + esc(cfg.tick(t)) + '</text>';
+    });
+    s += '<line class="ch-axis" x1="' + pl + '" x2="' + (pl + iw) + '" y1="' + (pt + ih) + '" y2="' + (pt + ih) + '"/>';
+    var step = W < 420 ? 3 : (W < 760 ? 2 : 1);
+    cfg.labels.forEach(function (lb, i) {
+      if ((n - 1 - i) % step !== 0) { return; }
+      var anc = i === n - 1 && n > 1 ? 'end' : (i === 0 && n > 1 ? 'start' : 'middle');
+      var lx = anc === 'end' ? x(i) + 4 : anc === 'start' ? x(i) - 4 : x(i);
+      s += '<text class="ch-txt" x="' + lx.toFixed(1) + '" y="' + (H - 9) + '" text-anchor="' + anc + '">' + esc(lb) + '</text>';
+    });
+    if (cfg.target != null && isFinite(cfg.target)) {
+      var ty = y(cfg.target);
+      s += '<line class="ch-target" x1="' + pl + '" x2="' + (pl + iw) + '" y1="' + ty.toFixed(1) + '" y2="' + ty.toFixed(1) + '"/>';
+      /* Etiketi veri noktalarıyla çakışmayan ilk konuma yerleştir: sol üst, sol alt, sağ üst, sağ alt */
+      var opts = [['l', ty - 6], ['l', ty + 15], ['r', ty - 6], ['r', ty + 15]], pick = opts[0];
+      for (var oi = 0; oi < opts.length; oi++) {
+        var o = opts[oi];
+        if (o[1] < pt + 10 || o[1] > pt + ih - 2) { continue; }
+        var hit = cfg.series.some(function (se) { return se.values.some(function (v, i) {
+          if (v == null || !isFinite(v)) { return false; }
+          var inX = o[0] === 'l' ? x(i) < pl + 96 : x(i) > pl + iw - 96;
+          return inX && Math.abs(y(v) - (o[1] - 4)) < 12;
+        }); });
+        if (!hit) { pick = o; break; }
+      }
+      s += '<text class="ch-target-txt" x="' + (pick[0] === 'l' ? pl + 6 : pl + iw - 4) + '" y="' + pick[1].toFixed(1) + '" text-anchor="' + (pick[0] === 'l' ? 'start' : 'end') + '">Hedef ' + esc(cfg.tick(cfg.target, true)) + '</text>';
+    }
+    cfg.series.forEach(function (se) {
+      var line = se.cls || 'ch-s1', dot = se.dot || 'ch-p1', d = '', started = false;
+      se.values.forEach(function (v, i) {
+        if (v == null || !isFinite(v)) { started = false; return; }
+        d += (started ? 'L' : 'M') + x(i).toFixed(1) + ' ' + y(v).toFixed(1) + ' ';
+        started = true;
+      });
+      s += '<path class="' + line + '" d="' + d.trim() + '"/>';
+      se.values.forEach(function (v, i) {
+        if (v == null || !isFinite(v)) { return; }
+        s += '<circle class="' + dot + '" cx="' + x(i).toFixed(1) + '" cy="' + y(v).toFixed(1) + '" r="' + (se.small ? 2.4 : 3.2) + '"><title>' + esc(cfg.labels[i] + ' · ' + se.name + ': ' + cfg.fmt(v)) + '</title></circle>';
+      });
+    });
+    s += '</svg>';
+    el.innerHTML = s;
+  }
+
+  /* Yatay çubuk listesi (HTML) */
+  function hbars(items, max) {
+    return items.map(function (it) {
+      var w = max > 0 ? Math.max(it.v > 0 ? 2 : 0, it.v / max * 100) : 0;
+      return '<div class="hb" style="margin:6px 0"><span class="hb-l">' + esc(it.label) + '</span><span class="hb-t ' + (it.cls || '') + '" aria-hidden="true"><span style="width:' + w.toFixed(1) + '%"></span></span><span class="hb-v">' + esc(it.txt) + (it.sub ? '<span class="sub">' + esc(it.sub) + '</span>' : '') + '</span></div>';
+    }).join('');
+  }
+
+  /* ---------- Aç/kapa düğmeleri ---------- */
+  var ON_TOGGLE = {};
+  function setTgl(id, on) {
+    var el = $(id); if (el) { el.hidden = !on; }
+    Array.prototype.forEach.call(document.querySelectorAll('[data-tgl][aria-controls="' + id + '"]'), function (b) {
+      b.setAttribute('aria-expanded', on ? 'true' : 'false');
+      var t = b.getAttribute(on ? 'data-on' : 'data-off'); if (t) { b.textContent = t; }
+    });
+    if (ON_TOGGLE[id]) { ON_TOGGLE[id](on); }
+  }
+
+  /* ---------- Ortak hesaplar ---------- */
+  var DAY_TODAY = C.agg([REF]), DAY_PREV = C.agg([PREV_WEEK]);
+  var R_TODAY = C.ratios(DAY_TODAY), R_PREV = C.ratios(DAY_PREV);
+  var PLAN_TODAY = C.planFor(REF, C.DAYS[C.DAYS.length - 2]);
+  var PLAN_PREV = C.planFor(PREV_WEEK, C.DAYS[C.DAYS.indexOf(PREV_WEEK) - 1]);
+  var PLAN = C.planFor(NEXT, REF);
+  var W24 = C.LAST24, A24 = C.agg(W24), R24 = C.ratios(A24);
+  var SALES_TODAY = C.salesPct(REF), SALES_PREV = C.salesPct(PREV_WEEK);
+  var MTD = C.mtd(REF), MTD_PREV = C.mtd(PREV_WEEK);
+  function zoneAgg(z, isos) { return C.agg(isos, function (c) { return c.zone === z.id; }); }
+  var ZSTAT = {};
+  C.ZONES.forEach(function (z) { var a = zoneAgg(z, W24); ZSTAT[z.id] = { a: a, r: C.ratios(a), today: C.ratios(zoneAgg(z, [REF])), todayAgg: zoneAgg(z, [REF]) }; });
+  function zoneTph(z) { return ZSTAT[z.id].r.tph; }
+  function ceilReq(v) { return Math.ceil(v - 1e-9); }
+  var PLAN_ROWS = PLAN.zones.map(function (x) {
+    var tph = zoneTph(x.z);
+    var r50 = C.couriersNeeded(x.band.p50, tph, C.HOURS.std), r90 = C.couriersNeeded(x.band.p90, tph, C.HOURS.std);
+    return { z: x.z, band: x.band, vals: x.vals, tph: tph, r50: r50, r90: r90, assigned: x.z.nC, load90: r90 / x.z.nC * 100 };
+  });
+  /* Bölge yükü (P90): ≤ %105 yeterli, ≤ %115 sınırda, üstü destek gerekir */
+  function loadStatus(l) { return l <= 105 ? 'good' : (l <= 115 ? 'warn' : 'crit'); }
+  var LOAD_TXT = { good: 'Yeterli', warn: 'Sınırda', crit: 'Destek gerekli' };
+  var BR_TPH = R24.tph;
+  var REQ50 = C.couriersNeeded(PLAN.branch.band.p50, BR_TPH, C.HOURS.std), REQ90 = C.couriersNeeded(PLAN.branch.band.p90, BR_TPH, C.HOURS.std);
+  var ASSIGNED = C.COURIERS.length;
+  var SUCC = A24.teslim / (A24.att + A24.attC); /* deneme başına teslim oranı */
+  function wiDefaults() { return { kurye: ASSIGNED, saat: C.HOURS.std, gonderi: Math.round(PLAN.branch.band.p50) }; }
+  function wiCalc(p) { return C.whatIf({ kurye: p.kurye, saat: p.saat, gonderi: p.gonderi, devirIn: DAY_TODAY.devir, tph: BR_TPH, basari: SUCC }); }
+  function gapStatus(gap) { return gap >= 0 ? 'good' : (gap === -1 ? 'warn' : 'crit'); }
+  function sgnInt(v) { return (v < 0 ? '−' : '') + Math.abs(v); }
+  function gapTxt(gap) { return gap >= 0 ? (gap === 0 ? 'yeterli' : gap + ' fazla') : (-gap) + ' eksik'; }
+
+  /* ================= 1. ŞUBE ÖZETİ ================= */
+  var OZ_KPIS = ['vol', 'onTime', 'fa', 'devir', 'comp', 'sales'];
+  function ozValue(k, which) {
+    if (k === 'sales') { return which === 'today' ? SALES_TODAY : SALES_PREV; }
+    var r = which === 'today' ? R_TODAY : R_PREV;
+    return r[k];
+  }
+  function deltaHtml(k, v, p) {
+    if (v == null || p == null) { return ''; }
+    var d = v - p, dir = T[k].dir, better = dir === 'up' ? d > 0 : d < 0;
+    var flat = k === 'vol' ? d === 0 : Math.abs(d) < 0.05;
+    var txt = k === 'vol' ? (d >= 0 ? '+' : '−') + n0(Math.abs(d)) : k === 'comp' ? (d >= 0 ? '+' : '−') + nd(Math.abs(d), 2) + '‰' : (d >= 0 ? '+' : '−') + nd(Math.abs(d), 1) + ' puan';
+    var cls = k === 'vol' ? 'flat' : (flat ? 'flat' : better ? 'better' : 'worse');
+    return ' <span class="delta ' + cls + '">' + (d > 0 ? '▲' : d < 0 ? '▼' : '■') + ' ' + esc(txt) + '</span>';
+  }
+  function ozTile(k) {
+    var v = ozValue(k, 'today'), p = ozValue(k, 'prev'), st, chipTxt, formula, calc, foot;
+    var dt = DAY_TODAY;
+    var prevTxt = '<span>Geçen hafta (' + esc(fmtShort(PREV_WEEK)) + '): <b>' + esc(fmtVal(k, p)) + '</b></span>' + deltaHtml(k, v, p);
+    if (k === 'vol') {
+      var b = PLAN_TODAY.branch.band;
+      st = C.bandStatus(v, b.p10, b.p90);
+      chipTxt = st === 'good' ? 'Plan içinde' : (v > b.p90 ? 'Planın üstünde' : 'Planın altında');
+      foot = prevTxt + '<br><span>Plan bandı (P10–P90): <b>' + esc(n0(b.p10) + '–' + n0(b.p90)) + '</b></span>';
+      formula = 'şubeye dağıtım için gelen gönderi (devir hariç)';
+      calc = 'Plan: son 4 ' + C.DOW_NAMES[C.dow(REF)] + ' ort. ' + nd(b.mean, b.mean % 1 === 0 ? 0 : 2) + ' × trend ' + nd(b.trend, 4) + ' = ' + n0(b.p50);
+    } else {
+      st = C.status(v, T[k]); chipTxt = STATUS_TXT[st];
+      foot = prevTxt + '<br><span>Hedef: <b>' + esc(targetTxt(k)) + '</b></span>';
+      if (k === 'onTime') { formula = 'teslim edilen ÷ dağıtıma çıkan × 100'; calc = '= ' + n0(dt.teslim) + ' ÷ ' + n0(dt.D) + ' × 100 (dağıtıma çıkan = ' + n0(dt.G) + ' gelen + ' + n0(dt.cin) + ' devir)'; }
+      else if (k === 'fa') { formula = 'ilk denemede teslim ÷ ilk kez denenen gönderi × 100'; calc = '= ' + n0(dt.first) + ' ÷ ' + n0(dt.att) + ' × 100 (kapasite yetmediği için denenemeyen ' + n0(dt.G - dt.att) + ' gönderi devirde)'; }
+      else if (k === 'devir') { formula = 'ertesi güne kalan ÷ dağıtıma çıkan × 100'; calc = '= ' + n0(dt.devir) + ' ÷ ' + n0(dt.D) + ' × 100'; }
+      else if (k === 'comp') { formula = 'şikâyet ÷ teslim edilen × 1.000'; calc = '= ' + n0(dt.compAll) + ' ÷ ' + n0(dt.teslim) + ' × 1.000'; }
+      else if (k === 'sales') {
+        formula = 'ay içi ciro ÷ (aylık ciro hedefi × geçen iş günü ÷ ayın iş günü) × 100';
+        calc = '= ' + mnTL(MTD.ciro, 3) + ' ÷ (' + mnTL(C.TARGET_CIRO[MTD.m], 3) + ' × ' + MTD.days + '/' + MTD.total + ') × 100';
+      }
+    }
+    var title = T[k].name + (k === 'comp' ? ' (binde)' : k === 'sales' ? ' (Kasım, ay içi)' : '');
+    return tile({ id: 'oz-' + k, title: title, val: valHtml(k, v), chip: chip(st, chipTxt), foot: foot, formula: formula, calc: calc });
+  }
+  function renderOzet() {
+    $('ozTiles').innerHTML = OZ_KPIS.map(ozTile).join('');
+    renderTrend();
+    renderAttention();
+    renderOzTable();
+    $('ozFoot').textContent = 'Şubede ' + C.COURIERS.length + ' kurye ve ' + C.ZONES.length + ' dağıtım bölgesi vardır. Bugünkü değerler ' + dayLabel(REF) + ' gün sonuna aittir; geçen hafta ile bir önceki haftanın aynı günü kastedilir.';
+  }
+  function weekValue(k, w) {
+    if (k === 'sales') { return C.salesPctRange(w.days); }
+    return C.ratios(C.agg(w.days))[k];
+  }
+  function renderTrend() {
+    var k = State.trendKpi, t = T[k];
+    var vals = C.WEEKS.map(function (w) { return weekValue(k, w); });
+    var hasT = k !== 'vol';
+    $('trendLegTg').hidden = !hasT;
+    lineChart($('trendChart'), {
+      labels: C.WEEKS.map(function (w) { return fmtShort(w.start); }), series: [{ name: t.name, values: vals }], target: hasT ? t.target : null,
+      aria: t.name + ', son 12 haftanın haftalık değerleri', fmt: function (v) { return fmtVal(k, v); }, yZero: false,
+      tick: function (v) { return k === 'vol' ? n0(v) : k === 'comp' ? nd(v, v % 1 === 0 ? 0 : 1) + '‰' : '%' + nd(v, v % 1 === 0 ? 0 : 1); }
+    });
+    var notes = {
+      vol: 'Haftalık değer, iş günü başına ortalama gelen gönderidir. Kasım kampanyalarıyla hacim artıyor.',
+      onTime: 'Haftalık değer = haftanın teslim edilen toplamı ÷ dağıtıma çıkan toplamı × 100.',
+      fa: 'Haftalık değer = haftanın ilk denemede teslim toplamı ÷ ilk kez denenen gönderi toplamı × 100.',
+      devir: 'Haftalık değer = haftanın devir toplamı ÷ dağıtıma çıkan toplamı × 100.',
+      comp: 'Haftalık değer = haftanın şikâyet toplamı ÷ teslim toplamı × 1.000.',
+      sales: 'Haftalık değer = haftanın cirosu ÷ aynı günlerin orantılı ciro hedefi × 100.'
+    };
+    $('trendNote').textContent = notes[k] + ' Haftalar Pazartesi başlangıç tarihiyle gösterilir.';
+  }
+  var ACTION = {
+    fa: function (z) { return z.id === 'gorukle' ? 'Teslimattan önce alıcıya SMS gönderilsin; evde bulunamayan öğrenciler için anlaşmalı teslim noktasına yönlendirme yapılsın.' : 'Teslimattan önce alıcıya SMS gönderilsin; adreste bulunamayan gönderiler için aynı gün ikinci deneme planlansın.'; },
+    devir: function (z) { return 'Devreden gönderiler yarın 1. tura alınsın; ' + z.name + ' bölgesine 2. turda yakın bölgeden destek kurye kaydırılsın.'; },
+    staff: 'Yarın için bir yedek kurye hazır tutulsun veya 2. tur bir saat uzatılsın; hesap Günlük Planlama sekmesindedir.',
+    aged: 'Bu şikâyetler için müşteriler bugün aransın; çözümü gecikenler bölge sorumlusuna atansın.',
+    sales: 'Hacmi düşen kurumsal müşteriler bu hafta ziyaret edilsin; teklif aşamasındaki adaylar için kapanış tarihi belirlensin.',
+    comp: 'Bugünkü şikâyet kayıtları akşam toplantısında kurye bazında gözden geçirilsin.'
+  };
+  function agedOpen() { return D.COMPL.filter(function (x) { return x.open && x.ageDays > 3; }); }
+  function renderAttention() {
+    var items = [];
+    C.ZONES.forEach(function (z) {
+      var r = ZSTAT[z.id].today;
+      if (r.fa != null && r.fa < T.fa.target) { items.push({ kind: 'fa', sev: (T.fa.target - r.fa) / T.fa.warn, st: C.status(r.fa, T.fa), head: z.name + ' bölgesi', k: 'ilk denemede teslim ' + pct(r.fa, 1), g: 'hedef ' + targetTxt('fa'), act: ACTION.fa(z) }); }
+      if (r.devir != null && r.devir > T.devir.target) { items.push({ kind: 'devir', sev: (r.devir - T.devir.target) / T.devir.warn, st: C.status(r.devir, T.devir), head: z.name + ' bölgesi', k: 'devir oranı ' + pct(r.devir, 1) + ' (' + n0(ZSTAT[z.id].todayAgg.devir) + ' gönderi)', g: 'hedef ' + targetTxt('devir'), act: ACTION.devir(z) }); }
+    });
+    var gap90 = ASSIGNED - ceilReq(REQ90);
+    if (gap90 < 0) { items.push({ kind: 'staff', sev: -gap90, st: gapStatus(gap90), head: 'Yarın (' + C.DOW_NAMES[C.dow(NEXT)] + ') kurye ihtiyacı', k: 'P90 senaryosunda ' + ceilReq(REQ90) + ' kurye gerekiyor, ' + ASSIGNED + ' atanmış', g: 'P50 senaryosunda ' + ceilReq(REQ50) + ' kurye', act: ACTION.staff }); }
+    var aged = agedOpen();
+    if (aged.length) { items.push({ kind: 'aged', sev: aged.length / 2, st: aged.length >= 3 ? 'crit' : 'warn', head: 'Açık şikâyetler', k: '3 günden eski ' + aged.length + ' kayıt hâlâ açık', g: 'en eskisi ' + Math.max.apply(null, aged.map(function (x) { return x.ageDays; })) + ' gün önce açıldı', act: ACTION.aged }); }
+    if (SALES_TODAY != null && SALES_TODAY < T.sales.target) { items.push({ kind: 'sales', sev: (T.sales.target - SALES_TODAY) / T.sales.warn, st: C.status(SALES_TODAY, T.sales), head: 'Kasım satış hedefi', k: 'orantılı hedefe göre gerçekleşme ' + pct(SALES_TODAY, 1), g: 'hedef ' + targetTxt('sales'), act: ACTION.sales }); }
+    if (R_TODAY.comp > T.comp.target) { items.push({ kind: 'comp', sev: (R_TODAY.comp - T.comp.target) / T.comp.warn, st: C.status(R_TODAY.comp, T.comp), head: 'Şube geneli', k: 'şikâyet oranı ' + pm(R_TODAY.comp), g: 'hedef ' + targetTxt('comp'), act: ACTION.comp }); }
+    items.sort(function (a, b) { return b.sev - a.sev; });
+    var seen = {}, pick = [];
+    items.forEach(function (it) { if (pick.length < 3 && !seen[it.kind] && !seen['h|' + it.head]) { seen[it.kind] = 1; seen['h|' + it.head] = 1; pick.push(it); } });
+    if (!pick.length) { $('attList').innerHTML = '<li class="prio-empty">Bugün bütün göstergeler hedefte.</li>'; return; }
+    $('attList').innerHTML = pick.map(function (it) {
+      return '<li><span class="pi-txt"><b>' + esc(it.head) + '</b><span class="pi-k"> · ' + esc(it.k) + '</span><br><span class="pi-g">' + esc(it.g) + '</span></span>' +
+        chip(it.st, STATUS_TXT[it.st]) + '<span class="pi-a"><strong>Aksiyon:</strong> ' + esc(it.act) + '</span></li>';
+    }).join('');
+  }
+  function renderOzTable() {
+    var days = C.DAYS.slice(-12), tot = { G: 0, kab: 0, D: 0, teslim: 0, first: 0, devir: 0, iade: 0, hasar: 0, comp: 0 };
+    var rows = days.map(function (iso) {
+      var a = C.agg([iso]), k = D.KAB[iso] ? D.KAB[iso].adet : 0;
+      tot.G += a.G; tot.kab += k; tot.D += a.D; tot.teslim += a.teslim; tot.first += a.first; tot.devir += a.devir; tot.iade += a.iade; tot.hasar += a.hasar; tot.comp += a.compAll;
+      return '<tr><td class="nowrap">' + esc(fmtDate(iso)) + '<span class="sub">' + esc(C.DOW_NAMES[C.dow(iso)]) + '</span></td><td class="n">' + n0(a.G) + '</td><td class="n">' + n0(k) + '</td><td class="n">' + n0(a.D) + '</td><td class="n">' + n0(a.teslim) + '</td><td class="n">' + n0(a.first) + '</td><td class="n">' + n0(a.devir) + '</td><td class="n">' + n0(a.iade) + '</td><td class="n">' + n0(a.hasar) + '</td><td class="n">' + n0(a.compAll) + '</td></tr>';
+    }).join('');
+    $('ozTable').innerHTML = '<thead><tr><th>Tarih</th><th class="n">Gelen</th><th class="n">Kabul (çıkış)</th><th class="n">Dağıtıma çıkan</th><th class="n">Teslim</th><th class="n">İlk denemede</th><th class="n">Devir</th><th class="n">İade</th><th class="n">Hasar / kayıp</th><th class="n">Şikâyet</th></tr></thead><tbody>' + rows + '</tbody>' +
+      '<tfoot><tr><td>Toplam</td><td class="n">' + n0(tot.G) + '</td><td class="n">' + n0(tot.kab) + '</td><td class="n">' + n0(tot.D) + '</td><td class="n">' + n0(tot.teslim) + '</td><td class="n">' + n0(tot.first) + '</td><td class="n">' + n0(tot.devir) + '</td><td class="n">' + n0(tot.iade) + '</td><td class="n">' + n0(tot.hasar) + '</td><td class="n">' + n0(tot.comp) + '</td></tr></tfoot>';
+  }
+
+  /* ================= 2. GÜNLÜK PLANLAMA ================= */
+  function renderPlan() {
+    var b = PLAN.branch.band, gap50 = ASSIGNED - ceilReq(REQ50), gap90 = ASSIGNED - ceilReq(REQ90);
+    var wi = wiCalc(wiDefaults()), wiSt = C.status(wi.oran, T.devir);
+    var dn = C.DOW_NAMES[C.dow(NEXT)];
+    $('plTiles').innerHTML = [
+      tile({ id: 'pl-vol', title: 'Yarın beklenen gönderi (' + fmtShort(NEXT) + ' ' + dn + ')', val: esc(n0(b.p50)) + '<span class="u">P50</span>', chip: chip('info', 'Aralık'),
+        foot: '<span>P10 <b>' + esc(n0(b.p10)) + '</b> · P90 <b>' + esc(n0(b.p90)) + '</b></span>',
+        formula: 'P50 = son 4 ' + dn + ' ortalaması × trend katsayısı', calc: '= ' + n0(b.mean) + ' × ' + nd(b.trend, 3) + ' · P10/P90 = P50 × (1 ∓ 1,2816 × ' + nd(b.s, 3) + ')' }),
+      tile({ id: 'pl-req', title: 'Gereken kurye', val: esc(ceilReq(REQ50) + '–' + ceilReq(REQ90)) + '<span class="u">kurye</span>', chip: chip('info', 'P50–P90'),
+        foot: '<span>Şube teslim/saat (son 4 hafta): <b>' + esc(nd(BR_TPH, 1)) + '</b></span>',
+        formula: 'tahmin ÷ (teslim/saat × efektif saat)', calc: 'P50: ' + n0(b.p50) + ' ÷ (' + nd(BR_TPH, 2) + ' × ' + nd(C.HOURS.std, 1) + ') = ' + nd(REQ50, 1) + ' · P90: ' + n0(b.p90) + ' ÷ (' + nd(BR_TPH, 2) + ' × ' + nd(C.HOURS.std, 1) + ') = ' + nd(REQ90, 1) }),
+      tile({ id: 'pl-gap', title: 'Atanmış kurye ve fark', val: esc(String(ASSIGNED)) + '<span class="u">kurye</span>', chip: chip(gapStatus(gap90), gap90 >= 0 ? 'Yeterli' : 'P90 için ' + (-gap90) + ' eksik'),
+        foot: '<span>P50 senaryosu: <b>' + esc(gapTxt(gap50)) + '</b> · P90 senaryosu: <b>' + esc(gapTxt(gap90)) + '</b></span>',
+        formula: 'fark = atanmış kurye − gereken kurye (yukarı yuvarlanmış)', calc: 'P50: ' + ASSIGNED + ' − ' + ceilReq(REQ50) + ' = ' + sgnInt(gap50) + ' · P90: ' + ASSIGNED + ' − ' + ceilReq(REQ90) + ' = ' + sgnInt(gap90) }),
+      tile({ id: 'pl-dev', title: 'Mevcut kadroyla beklenen devir', val: esc(pct(wi.oran, 1)), chip: chip(wiSt, STATUS_TXT[wiSt]),
+        foot: '<span><b>' + esc(n0(wi.devir)) + '</b> gönderi ertesi güne kalır · hedef <b>' + esc(targetTxt('devir')) + '</b></span>',
+        formula: 'devir = dağıtıma çıkacak − en az(kapasite, dağıtıma çıkacak × deneme başına teslim oranı)', calc: 'P50 tahmini, ' + ASSIGNED + ' kurye ve ' + nd(C.HOURS.std, 1) + ' saatlik tur için hesaplanmıştır; ayrıntısı “Ne olursa?” kutusundadır.' })
+    ].join('');
+    $('zoneDate').textContent = dayLabel(NEXT);
+    var tot = { p50: 0, a: 0 };
+    var rows = PLAN_ROWS.map(function (r) {
+      var lst = loadStatus(r.load90), fa = ZSTAT[r.z.id].r.fa, faSt = C.status(fa, T.fa);
+      tot.p50 += r.band.p50; tot.a += r.assigned;
+      return '<tr><td class="nowrap"><span class="zno">' + r.z.no + '</span>' + esc(r.z.name) + '<span class="sub">' + esc(r.z.ilce) + '</span></td>' +
+        '<td class="n"><b>' + n0(r.band.p50) + '</b><span class="sub">' + esc(n0(r.band.p10) + '–' + n0(r.band.p90)) + '</span></td>' +
+        '<td class="n">' + esc(nd(r.r50, 1) + '–' + nd(r.r90, 1)) + '</td>' +
+        '<td class="n">' + r.assigned + '</td>' +
+        '<td><span title="' + esc(LOAD_TXT[lst]) + '">' + chip(lst, pct(r.load90, 0)) + '</span></td>' +
+        '<td class="n' + (faSt === 'good' ? '' : ' neg') + '">' + esc(pct(fa, 1)) + '</td></tr>';
+    }).join('');
+    $('zoneTable').innerHTML = '<thead><tr><th>Bölge</th><th class="n">Tahmin P50<span class="sub">P10–P90</span></th><th class="n">Gereken kurye<span class="sub">P50–P90</span></th><th class="n">Atanmış</th><th>P90 yükü</th><th class="n">İlk deneme<span class="sub">son 4 hafta</span></th></tr></thead><tbody>' + rows + '</tbody>' +
+      '<tfoot><tr><td>Şube</td><td class="n">' + n0(tot.p50) + '<span class="sub">' + esc(n0(b.p10) + '–' + n0(b.p90)) + '</span></td><td class="n">' + esc(nd(REQ50, 1) + '–' + nd(REQ90, 1)) + '</td><td class="n">' + tot.a + '</td><td>' + chip(gapStatus(gap90), gapTxt(gap90)) + '</td><td class="n">' + esc(pct(R24.fa, 1)) + '</td></tr></tfoot>';
+    $('zoneNote').textContent = 'Gereken kurye = bölge tahmini ÷ (bölgenin teslim/saat değeri × ' + nd(C.HOURS.std, 1) + ' saat). P90 yükü = P90 için gereken kurye ÷ atanmış kurye × 100; %105’e kadar yeterli, %115’e kadar sınırda sayılır. Şube aralığı şube toplamından ayrıca hesaplandığı için bölge aralıklarının toplamından dardır.';
+    renderWhatIf();
+    renderFcDetail();
+    renderMap();
+  }
+  /* Ne olursa? */
+  var WI = null;
+  function wiFill(p) { $('wiK').value = nf(0).format(p.kurye); $('wiH').value = nf(1).format(p.saat); $('wiV').value = nf(0).format(p.gonderi); ['wiK', 'wiH', 'wiV'].forEach(function (id) { $(id).setAttribute('aria-invalid', 'false'); $(id + '-err').textContent = ''; }); }
+  function wiRead() {
+    var ok = true, p = {};
+    var spec = [['wiK', 'kurye', 'int', 1, 40, 'Kurye sayısı 1 ile 40 arasında bir tam sayı olmalıdır.'], ['wiH', 'saat', 'dec', 1, 12, 'Tur süresi 1 ile 12 saat arasında olmalıdır (ondalık için virgül kullanın).'], ['wiV', 'gonderi', 'int', 0, 20000, 'Gönderi sayısı 0 ile 20.000 arasında bir tam sayı olmalıdır (örnek: 1.800).']];
+    spec.forEach(function (s) {
+      var v = C.parseNum($(s[0]).value, s[2]), err = '';
+      if (isNaN(v)) { err = s[2] === 'int' ? 'Geçerli bir tam sayı girin. ' + s[5] : 'Geçerli bir sayı girin. ' + s[5]; }
+      else if (v < s[3] || v > s[4]) { err = s[5]; }
+      $(s[0] + '-err').textContent = err;
+      $(s[0]).setAttribute('aria-invalid', err ? 'true' : 'false');
+      if (err) { ok = false; } else { p[s[1]] = v; }
+    });
+    return ok ? p : null;
+  }
+  function renderWhatIf() {
+    if (!WI) { WI = wiDefaults(); wiFill(WI); }
+    var p = wiRead();
+    if (!p) { $('wiOut').style.opacity = '0.45'; return; }
+    $('wiOut').style.opacity = '';
+    WI = p;
+    var r = wiCalc(p), st = C.status(r.oran, T.devir);
+    $('wiOut').innerHTML =
+      '<div><div class="o-l">Teslim kapasitesi</div><div class="o-v">' + esc(n0(r.cap)) + '<span class="u">gönderi</span></div></div>' +
+      '<div><div class="o-l">Beklenen teslim (' + esc(n0(r.out)) + ' gönderiden)</div><div class="o-v">' + esc(n0(r.teslim)) + '<span class="u">gönderi</span></div></div>' +
+      '<div><div class="o-l">Beklenen devir</div><div class="o-v">' + esc(n0(r.devir)) + '<span class="u">gönderi · ' + esc(pct(r.oran, 1)) + '</span> ' + chip(st, STATUS_TXT[st]) + '</div></div>';
+    $('wiF').innerHTML = '<span class="kf-l">Formül</span>kapasite = kurye × teslim/saat × saat = ' + esc(n0(p.kurye) + ' × ' + nd(BR_TPH, 2) + ' × ' + nd(p.saat, 1) + ' = ' + n0(r.cap)) +
+      '<span class="kf-c">dağıtıma çıkacak = gönderi + bugünkü devir = ' + esc(n0(p.gonderi) + ' + ' + n0(DAY_TODAY.devir) + ' = ' + n0(r.out)) + '</span>' +
+      '<span class="kf-c">beklenen teslim = en az(kapasite, dağıtıma çıkacak × ' + esc(pct(SUCC * 100, 2)) + ' deneme başına teslim oranı) = ' + esc(n0(r.teslim)) + ' · devir = ' + esc(n0(r.out) + ' − ' + n0(r.teslim) + ' = ' + n0(r.devir)) + '</span>';
+  }
+  function renderFcDetail() {
+    $('fcDays').textContent = 'Kullanılan günler: ' + PLAN.days.map(fmtShort).join(', ');
+    var ti = PLAN.trendIn;
+    $('fcTrend').innerHTML = '<span class="kf-l">Trend</span>son 12 iş günü ortalaması ÷ önceki 12 iş günü ortalaması = ' + esc(n0(ti.a) + ' ÷ ' + n0(ti.b) + ' = ' + nd(PLAN.trend, 3)) +
+      '<span class="kf-c">' + esc(fmtShort(ti.aFrom) + '–' + fmtShort(ti.aTo) + ' ve ' + fmtShort(ti.bFrom) + '–' + fmtShort(ti.bTo) + ' · 0,90–1,15 aralığıyla sınırlıdır') + '</span>';
+    var hd = PLAN.days.map(function (d) { return '<th class="n">' + esc(fmtShort(d)) + '</th>'; }).join('');
+    var rows = PLAN_ROWS.map(function (r) {
+      return '<tr><td class="nowrap"><span class="zno">' + r.z.no + '</span>' + esc(r.z.name) + '</td>' + r.vals.map(function (v) { return '<td class="n">' + n0(v) + '</td>'; }).join('') +
+        '<td class="n">' + nd(r.band.mean, 1) + '</td><td class="n">' + nd(r.band.s, 3) + '</td><td class="n">' + esc(n0(r.band.p10) + ' / ' + n0(r.band.p50) + ' / ' + n0(r.band.p90)) + '</td><td class="n">' + nd(r.tph, 1) + '</td></tr>';
+    }).join('');
+    var bb = PLAN.branch;
+    $('fcTable').innerHTML = '<thead><tr><th>Bölge</th>' + hd + '<th class="n">Ortalama</th><th class="n">s</th><th class="n">P10 / P50 / P90</th><th class="n">Teslim/saat<span class="sub">son 4 hafta</span></th></tr></thead><tbody>' + rows + '</tbody>' +
+      '<tfoot><tr><td>Şube</td>' + bb.vals.map(function (v) { return '<td class="n">' + n0(v) + '</td>'; }).join('') + '<td class="n">' + nd(bb.band.mean, 1) + '</td><td class="n">' + nd(bb.band.s, 3) + '</td><td class="n">' + esc(n0(bb.band.p10) + ' / ' + n0(bb.band.p50) + ' / ' + n0(bb.band.p90)) + '</td><td class="n">' + nd(BR_TPH, 1) + '</td></tr></tfoot>';
+  }
+
+  /* ---- Harita ---- */
+  var mapState = { mode: null, map: null, layer: null, loading: false, tileErr: false };
+  function zoneMapStatus(z) { return C.status(ZSTAT[z.id].r.fa, T.fa); }
+  function zonePopup(r) {
+    var names = r.z.couriers.map(function (id) { return C.COURIER[id].name; }).join(', ');
+    return '<div class="pop"><h4>' + r.z.no + '. ' + esc(r.z.name) + ' <span class="muted">· ' + esc(r.z.ilce) + '</span></h4><table>' +
+      '<tr><td>Yarın tahmin</td><td class="n"><b>' + esc(n0(r.band.p10) + ' – ' + n0(r.band.p50) + ' – ' + n0(r.band.p90)) + '</b></td></tr>' +
+      '<tr><td>Atanmış kurye</td><td>' + esc(names) + '</td></tr>' +
+      '<tr><td>Gereken kurye</td><td class="n"><b>' + esc(nd(r.r50, 1) + '–' + nd(r.r90, 1)) + '</b></td></tr>' +
+      '<tr><td>İlk denemede teslim</td><td class="n"><b>' + esc(pct(ZSTAT[r.z.id].r.fa, 1)) + '</b></td></tr>' +
+      '</table><span class="src">P10 – P50 – P90 · ilk deneme oranı son 4 hafta · örnek veri</span></div>';
+  }
+  function radiusOf(v) { return 4 + Math.sqrt(v) * 0.8; }
+  function loadLeaflet(cb) {
+    if (window.L && window.L.map) { cb(true); return; }
+    if (mapState.loading) { return; }
+    mapState.loading = true;
+    var done = false;
+    function finish(ok) { if (done) { return; } done = true; mapState.loading = false; cb(ok); }
+    var sc = document.createElement('script');
+    sc.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
+    sc.crossOrigin = 'anonymous'; sc.referrerPolicy = 'no-referrer';
+    sc.onload = function () { finish(!!(window.L && window.L.map)); };
+    sc.onerror = function () { finish(false); };
+    setTimeout(function () { finish(!!(window.L && window.L.map)); }, 9000);
+    document.head.appendChild(sc);
+  }
+  function onTileErr() { if (!mapState.tileErr) { mapState.tileErr = true; $('mapNote').textContent = 'Harita altlığı yüklenemedi; bölge daireleri ve açılır bilgiler yine de çalışır.'; } }
+  function initLeaflet() {
+    var L = window.L;
+    var map = L.map('map', { zoomControl: true, scrollWheelZoom: false, attributionControl: true });
+    var sat = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+      maxZoom: 18, attribution: 'Uydu görüntüsü &copy; <a href="https://www.esri.com" target="_blank" rel="noopener noreferrer">Esri</a> — Esri, Maxar, Earthstar Geographics ve GIS kullanıcı topluluğu'
+    });
+    var dark = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}', {
+      maxZoom: 16, className: 'bm-koyu', attribution: 'Altlık &copy; <a href="https://www.esri.com" target="_blank" rel="noopener noreferrer">Esri</a> — Esri, HERE, Garmin, &copy; OpenStreetMap katkıda bulunanlar'
+    });
+    var osm = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 18, attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap</a> katkıda bulunanlar'
+    });
+    [sat, dark, osm].forEach(function (t) { t.on('tileerror', onTileErr); });
+    sat.addTo(map);
+    L.control.layers({ 'Uydu': sat, 'Koyu': dark, 'Açık': osm }, null, { collapsed: window.innerWidth < 600, position: 'topright' }).addTo(map);
+    var pts = C.ZONES.map(function (z) { return [z.lat, z.lon]; }); pts.push([C.BRANCH.lat, C.BRANCH.lon]);
+    map.fitBounds(pts, { padding: [30, 30] });
+    mapState.layer = L.layerGroup().addTo(map);
+    mapState.map = map; mapState.mode = 'leaflet';
+  }
+  function drawLeaflet() {
+    var L = window.L;
+    mapState.layer.clearLayers();
+    PLAN_ROWS.slice().sort(function (a, b) { return b.band.p50 - a.band.p50; }).forEach(function (r) {
+      L.circleMarker([r.z.lat, r.z.lon], { radius: radiusOf(r.band.p50), className: 'mk-zone st-' + zoneMapStatus(r.z), weight: 2, fillOpacity: 0.82 })
+        .bindPopup(zonePopup(r)).bindTooltip(r.z.no + '. ' + r.z.name + ' · P50 ' + n0(r.band.p50), { direction: 'top' }).addTo(mapState.layer);
+    });
+    L.marker([C.BRANCH.lat, C.BRANCH.lon], { icon: L.divIcon({ className: '', html: '<span class="mk-branch"></span>', iconSize: [16, 16], iconAnchor: [8, 8] }), keyboard: true, title: C.BRANCH.name })
+      .bindTooltip(C.BRANCH.name + ' · örnek konum', { direction: 'top' }).addTo(mapState.layer);
+  }
+  function drawSchematic() {
+    var box = $('map'), W = box.clientWidth || 300, H = box.clientHeight || 300, pad = 30;
+    var all = C.ZONES.concat([C.BRANCH]);
+    var lons = all.map(function (b) { return b.lon; }), lats = all.map(function (b) { return b.lat; });
+    var x0 = Math.min.apply(null, lons), x1 = Math.max.apply(null, lons), y0 = Math.min.apply(null, lats), y1 = Math.max.apply(null, lats);
+    var k = Math.cos(40.2 * Math.PI / 180), s = Math.min((W - 2 * pad) / ((x1 - x0) * k), (H - 2 * pad) / (y1 - y0));
+    var ox = (W - (x1 - x0) * k * s) / 2, oy = (H - (y1 - y0) * s) / 2;
+    function P(b) { return [ox + (b.lon - x0) * k * s, oy + (y1 - b.lat) * s]; }
+    var svg = '<svg class="schem" viewBox="0 0 ' + W + ' ' + H + '" role="group" aria-label="Dağıtım bölgelerinin şematik konumu">';
+    var bp = P(C.BRANCH);
+    svg += '<rect class="sc-br" x="' + (bp[0] - 7).toFixed(1) + '" y="' + (bp[1] - 7).toFixed(1) + '" width="14" height="14" rx="2"><title>' + esc(C.BRANCH.name) + '</title></rect>';
+    PLAN_ROWS.slice().sort(function (a, b) { return b.band.p50 - a.band.p50; }).forEach(function (r) {
+      var p = P(r.z), rad = radiusOf(r.band.p50) * 0.8;
+      svg += '<g class="sc-hit" tabindex="0" role="button" data-zone="' + r.z.id + '" aria-label="' + esc(r.z.no + '. ' + r.z.name + ', yarın P50 tahmini ' + n0(r.band.p50)) + '"><circle class="sc-z st-' + zoneMapStatus(r.z) + '" cx="' + p[0].toFixed(1) + '" cy="' + p[1].toFixed(1) + '" r="' + rad.toFixed(1) + '"/>' +
+        '<text class="sc-no" x="' + p[0].toFixed(1) + '" y="' + (p[1] + 4).toFixed(1) + '" text-anchor="middle">' + r.z.no + '</text></g>';
+    });
+    svg += '</svg>';
+    box.innerHTML = svg;
+    mapState.mode = 'schematic';
+  }
+  function showSchemInfo(id) {
+    var r = PLAN_ROWS.filter(function (x) { return x.z.id === id; })[0]; if (!r) { return; }
+    $('scInfo').setAttribute('data-zone', id);
+    $('scInfo').innerHTML = zonePopup(r);
+  }
+  function renderMap() {
+    if (mapState.mode === 'leaflet') { mapState.map.invalidateSize(); drawLeaflet(); return; }
+    if (mapState.mode === 'schematic') { drawSchematic(); return; }
+    if (mapState.loading) { return; }
+    loadLeaflet(function (ok) {
+      if (ok) {
+        try { initLeaflet(); drawLeaflet(); return; } catch (e) { mapState.mode = null; $('map').innerHTML = ''; }
+      }
+      $('mapNote').textContent = 'Harita kütüphanesi yüklenemedi; bölgeler şematik olarak gösteriliyor. Numaralar tablodaki bölgelerle aynıdır; bilgi için bir daireye tıklayın.';
+      drawSchematic();
+    });
+  }
+
+  /* ================= 3. EKİP VE KURYE PERFORMANSI ================= */
+  var CREW = null;
+  function crewStats() {
+    if (CREW) { return CREW; }
+    var compBy = {};
+    D.COMPL.forEach(function (x) { if (x.courier && W24.indexOf(x.iso) >= 0) { compBy[x.courier] = (compBy[x.courier] || 0) + 1; } });
+    var br = { tph: R24.tph, fa: R24.fa, devir: R24.devir, comp: C.permille(A24.comp, A24.teslim) };
+    var list = C.COURIERS.map(function (c) {
+      var a = C.agg(W24, function (x) { return x.id === c.id; }), r = C.ratios(a);
+      var cm = C.permille(a.comp, a.teslim);
+      var idx = {
+        tph: Math.min(1.2, r.tph / br.tph), fa: Math.min(1.2, r.fa / br.fa),
+        devir: Math.min(1.2, br.devir / Math.max(r.devir, 1)), comp: Math.min(1.2, br.comp / Math.max(cm, 0.3))
+      };
+      var score = 100 * (0.35 * idx.tph + 0.25 * idx.fa + 0.2 * idx.devir + 0.2 * idx.comp);
+      return { c: c, a: a, r: r, comp: a.comp, compRec: compBy[c.id] || 0, cm: cm, idx: idx, score: score, perDay: a.teslim / a.cdays };
+    });
+    list.sort(function (a, b) { return b.score - a.score; });
+    list.forEach(function (x, i) { x.rank = i + 1; x.coach = i >= list.length - 3; });
+    CREW = { list: list, br: br };
+    return CREW;
+  }
+  var COACH = {
+    tph: { k: 'saatlik teslim', t: 'Deneyimli bir kuryeyle bir gün birlikte tura çıkılması ve sabah yüklemesinin rota sırasına göre birlikte yapılması.' },
+    fa: { k: 'ilk denemede teslim', t: 'Teslimattan önce alıcıyı arama veya SMS gönderme alışkanlığının ve komşuya ya da teslim noktasına bırakma seçeneklerinin birlikte gözden geçirilmesi.' },
+    devir: { k: 'devir', t: 'Gün sonunda kalan gönderilerin nedenlerinin birlikte incelenmesi ve gerekirse 2. turda bölgeye destek verilmesi.' },
+    comp: { k: 'şikâyet', t: 'Şikâyet kayıtlarının birlikte okunması ve teslim anındaki iletişim adımlarının (bilgilendirme, imza, nazik kapanış) kısa bir uygulamayla tekrar edilmesi.' }
+  };
+  function renderEkip() {
+    var cs = crewStats(), br = cs.br;
+    var faSt = C.status(br.fa, T.fa), cSt = C.status(br.comp, T.comp);
+    var perDay = A24.teslim / A24.cdays;
+    $('crPeriod').textContent = fmtShort(W24[0]) + '–' + fmtDate(REF) + ' · ' + W24.length + ' iş günü';
+    $('ekTiles').innerHTML = [
+      tile({ id: 'ek-tph', title: 'Saatlik teslim (şube)', val: esc(nd(br.tph, 1)) + '<span class="u">teslim/saat</span>', chip: chip('info', 'Son 4 hafta'),
+        foot: '<span>Planlamada bu değer kullanılır.</span>', formula: 'teslim edilen ÷ dağıtımda geçen kurye-saat', calc: '= ' + n0(A24.teslim) + ' ÷ ' + n0(A24.hw) + ' saat' }),
+      tile({ id: 'ek-fa', title: 'İlk denemede teslim', val: esc(pct(br.fa, 1)), chip: chip(faSt, STATUS_TXT[faSt]),
+        foot: '<span>Hedef: <b>' + esc(targetTxt('fa')) + '</b></span>', formula: 'ilk denemede teslim ÷ ilk kez denenen gönderi × 100', calc: '= ' + n0(A24.first) + ' ÷ ' + n0(A24.att) + ' × 100' }),
+      tile({ id: 'ek-day', title: 'Kurye başına günlük teslim', val: esc(nd(perDay, 1)) + '<span class="u">gönderi</span>', chip: chip('info', C.COURIERS.length + ' kurye'),
+        foot: '<span>Cumartesi turları kısadır (6 saat).</span>', formula: 'teslim edilen ÷ kurye-gün', calc: '= ' + n0(A24.teslim) + ' ÷ ' + n0(A24.cdays) }),
+      tile({ id: 'ek-comp', title: 'Kurye kaynaklı şikâyet (binde)', val: esc(nd(br.comp, 2)) + '<span class="u">‰</span>', chip: chip(cSt, STATUS_TXT[cSt]),
+        foot: '<span>Çağrı merkezi kaynaklı şikâyetler hariçtir · hedef <b>' + esc(targetTxt('comp')) + '</b></span>', formula: 'kurye kaynaklı şikâyet ÷ teslim edilen × 1.000', calc: '= ' + n0(A24.comp) + ' ÷ ' + n0(A24.teslim) + ' × 1.000' })
+    ].join('');
+    var rows = cs.list.map(function (x) {
+      var st = x.coach ? chip('warn', 'Koçluk planı') : (x.score >= 100 ? chip('good', 'Güçlü') : chip('info', 'Dengeli'));
+      var faBad = C.status(x.r.fa, T.fa) !== 'good', dvBad = C.status(x.r.devir, T.devir) !== 'good', cBad = C.status(x.cm, T.comp) !== 'good';
+      return '<tr><td class="n">' + x.rank + '</td><td class="nowrap"><b>' + esc(x.c.name) + '</b><span class="sub">' + esc(C.ZONE[x.c.zone].name + ' · ' + x.c.veh) + '</span></td>' +
+        '<td class="n">' + nd(x.r.tph, 1) + '</td><td class="n' + (faBad ? ' neg' : '') + '">' + esc(pct(x.r.fa, 1)) + '</td><td class="n' + (dvBad ? ' neg' : '') + '">' + esc(pct(x.r.devir, 1)) + '</td>' +
+        '<td class="n' + (cBad ? ' neg' : '') + '">' + n0(x.comp) + '<span class="sub">' + esc(pm(x.cm)) + '</span></td><td class="n"><b>' + n0(x.score) + '</b></td><td>' + st + '</td></tr>';
+    }).join('');
+    $('crTable').innerHTML = '<thead><tr><th class="n">Sıra</th><th>Kurye</th><th class="n">Teslim/saat</th><th class="n">İlk deneme</th><th class="n">Devir</th><th class="n">Şikâyet<span class="sub">adet, binde</span></th><th class="n">Puan</th><th>Durum</th></tr></thead><tbody>' + rows + '</tbody>' +
+      '<tfoot><tr><td></td><td>Şube</td><td class="n">' + nd(br.tph, 1) + '</td><td class="n">' + esc(pct(br.fa, 1)) + '</td><td class="n">' + esc(pct(br.devir, 1)) + '</td><td class="n">' + n0(A24.comp) + '<span class="sub">' + esc(pm(br.comp)) + '</span></td><td class="n">100</td><td></td></tr></tfoot>';
+    var coach = cs.list.filter(function (x) { return x.coach; }).reverse();
+    $('coachList').innerHTML = coach.map(function (x) {
+      var keys = ['tph', 'fa', 'devir', 'comp'].sort(function (a, b) { return x.idx[a] - x.idx[b]; });
+      var k = keys[0], cv = { tph: nd(x.r.tph, 1) + ' teslim/saat; şube ' + nd(br.tph, 1), fa: pct(x.r.fa, 1) + '; şube ' + pct(br.fa, 1), devir: pct(x.r.devir, 1) + '; şube ' + pct(br.devir, 1), comp: pm(x.cm) + '; şube ' + pm(br.comp) }[k];
+      var zoneNote = x.c.zone === 'gorukle' ? ' Not: Görükle bölgesi uzak ve öğrenci yoğun olduğu için değerler bölgedeki diğer kuryeyle de karşılaştırılmalıdır.' : (x.c.id === 'k13' ? ' Not: İbrahim H. ekibe yeni katıldı; ilk üç ayda gelişim beklenir.' : '');
+      return '<li><span class="pi-txt"><b>' + esc(x.c.name) + '</b><span class="pi-k"> · ' + esc(C.ZONE[x.c.zone].name) + '</span><br><span class="pi-g">Gelişim alanı: ' + esc(COACH[k].k) + ' (' + esc(cv) + ')</span></span>' +
+        chip('warn', 'Puan ' + n0(x.score)) + '<span class="pi-a"><strong>Öneri:</strong> ' + esc(COACH[k].t + zoneNote) + '</span></li>';
+    }).join('');
+    renderShift();
+  }
+  function renderShift() {
+    var a = A24;
+    $('shiftPeriod').textContent = 'Son 4 hafta';
+    function row(lbl, g, cin, tes, first, att, dv, iade) {
+      var out = g + cin;
+      return '<tr><td>' + esc(lbl) + '</td><td class="n">' + n0(g) + '</td><td class="n">' + n0(cin) + '</td><td class="n">' + n0(tes) + '</td><td class="n">' + esc(pct(C.pctOf(first, att), 1)) + '</td><td class="n">' + n0(iade) + '</td><td class="n">' + n0(dv) + '</td><td class="n">' + esc(pct(C.pctOf(dv, out), 1)) + '</td></tr>';
+    }
+    $('shiftTable').innerHTML = '<thead><tr><th>Tur</th><th class="n">Yeni gönderi</th><th class="n">Devreden</th><th class="n">Teslim</th><th class="n">İlk deneme</th><th class="n">İade</th><th class="n">Devir</th><th class="n">Devir oranı</th></tr></thead><tbody>' +
+      row('1. tur (09:00–13:00)', a.G1, a.cin, a.teslim1, a.first1, a.att1, a.devir1, a.iade) + row('2. tur (14:00–18:30)', a.G2, 0, a.teslim2, a.first2, a.att2, a.devir2, 0) + '</tbody>' +
+      '<tfoot>' + row('Toplam', a.G, a.cin, a.teslim, a.first, a.att, a.devir, a.iade) + '</tfoot>';
+  }
+
+  /* ================= 4. MÜŞTERİ MEMNUNİYETİ VE ZİYARETLER ================= */
+  var CUST_BY = {}; D.cust.forEach(function (c) { CUST_BY[c.id] = c; });
+  function renderMusteri() {
+    var open = D.COMPL.filter(function (x) { return x.open; }), aged = agedOpen();
+    var since30 = C.addDays(REF, -30);
+    var closed30 = D.COMPL.filter(function (x) { return !x.open && x.closedIso > since30; });
+    var avgRes = C.mean(closed30.map(function (x) { return x.res; }));
+    var resSt = C.status(avgRes, T.resol), openSt = aged.length === 0 ? 'good' : (aged.length < 3 ? 'warn' : 'crit');
+    var w24c = D.COMPL.filter(function (x) { return W24.indexOf(x.iso) >= 0; });
+    var r24 = C.permille(w24c.length, A24.teslim), r24St = C.status(r24, T.comp);
+    var ranked = D.cust.slice().sort(function (a, b) { return b.risk - a.risk; }), top = ranked.slice(0, 5);
+    $('muTiles').innerHTML = [
+      tile({ id: 'mu-open', title: 'Açık şikâyet', val: esc(n0(open.length)) + '<span class="u">kayıt</span>', chip: chip(openSt, aged.length ? aged.length + ' kayıt 3 günden eski' : '3 günden eski yok'),
+        foot: '<span>Bugün kaydedilen şikâyet: <b>' + n0(D.COMPL.filter(function (x) { return x.iso === REF; }).length) + '</b></span>', formula: 'kapanmamış şikâyet kaydı; yaş = bugün − açılış günü', calc: 'bugün açılan: ' + open.filter(function (x) { return x.ageDays === 0; }).length + ' · 1–3 gün: ' + open.filter(function (x) { return x.ageDays >= 1 && x.ageDays <= 3; }).length + ' · 3 günden eski: ' + aged.length }),
+      tile({ id: 'mu-res', title: 'Ortalama çözüm süresi', val: esc(nd(avgRes, 1)) + '<span class="u">saat</span>', chip: chip(resSt, STATUS_TXT[resSt]),
+        foot: '<span>Son 30 günde kapanan ' + n0(closed30.length) + ' kayıt · hedef <b>≤ 24 saat</b></span>', formula: 'kapanan kayıtların (kapanış − açılış) saat ortalaması', calc: '= ' + nd(C.sum(closed30.map(function (x) { return x.res; })), 1) + ' saat ÷ ' + n0(closed30.length) + ' kayıt' }),
+      tile({ id: 'mu-rate', title: 'Şikâyet oranı (son 4 hafta)', val: esc(nd(r24, 2)) + '<span class="u">‰</span>', chip: chip(r24St, STATUS_TXT[r24St]),
+        foot: '<span>Hedef: <b>' + esc(targetTxt('comp')) + '</b></span>', formula: 'şikâyet ÷ teslim edilen × 1.000', calc: '= ' + n0(w24c.length) + ' ÷ ' + n0(A24.teslim) + ' × 1.000' }),
+      tile({ id: 'mu-visit', title: 'Bu hafta ziyaret', val: '5<span class="u">müşteri</span>', chip: chip(top[0].risk >= 50 ? 'crit' : 'warn', 'En yüksek risk ' + n0(top[0].risk)),
+        foot: '<span>Toplam ' + D.cust.length + ' kurumsal müşteriden</span>', formula: 'risk puanı en yüksek 5 müşteri', calc: 'Risk ≥ 50 olan müşteri: ' + ranked.filter(function (c) { return c.risk >= 50; }).length })
+    ].join('');
+    $('catPeriod').textContent = 'Son 4 hafta · ' + n0(w24c.length) + ' kayıt';
+    var cats = C.CATS.map(function (k) { var n = w24c.filter(function (x) { return x.cat === k.id; }).length; return { label: k.name, v: n, txt: n0(n), sub: pct(C.pctOf(n, w24c.length), 0) }; });
+    cats.sort(function (a, b) { return b.v - a.v; });
+    $('catBars').innerHTML = hbars(cats, cats[0].v);
+    var buckets = [['Bugün ve dün', 0, 1, ''], ['2–3 gün', 2, 3, 'alt'], ['4–7 gün', 4, 7, 'crit'], ['7 günden eski', 8, 9999, 'crit']].map(function (b) {
+      var n = open.filter(function (x) { return x.ageDays >= b[1] && x.ageDays <= b[2]; }).length; return { label: b[0], v: n, txt: n0(n), cls: b[3] };
+    });
+    $('ageBars').innerHTML = hbars(buckets, Math.max.apply(null, buckets.map(function (b) { return b.v; })));
+    $('visitList').innerHTML = top.map(function (c) {
+      var why = [], aim = [];
+      if (c.drop > 0) { why.push('Ekim hacmi önceki 3 ay ortalamasının ' + pct(c.drop, 1) + ' altında'); aim.push('hacim kaybının nedenini (fiyat, rakip, hizmet) dinlemek'); }
+      else { why.push('Ekim hacmi önceki 3 aya göre ' + signedPct(c.chg)); }
+      why.push(c.open ? c.open + ' açık şikâyet' : 'açık şikâyet yok');
+      if (c.open > 0) { aim.push('açık şikâyetleri yerinde kapatmak'); }
+      why.push('son ziyaret ' + c.visitDays + ' gün önce');
+      if (c.visitDays > 45) { aim.push('Kasım kampanya hacmini teyit etmek'); }
+      if (!aim.length) { aim.push('ilişkiyi güçlendirmek'); }
+      var st = c.risk >= 50 ? 'crit' : (c.risk >= 30 ? 'warn' : 'good');
+      return '<li><span class="pi-txt"><b>' + esc(c.name) + '</b><span class="pi-k"> · ' + esc(C.ZONE[c.zone].name) + '</span><br><span class="pi-g">' + esc(why.join(' · ')) + '</span></span>' +
+        chip(st, 'Risk ' + n0(c.risk)) + '<span class="pi-a"><strong>Ziyaret amacı:</strong> ' + esc(aim.join('; ')) + '. <span class="muted">(' + esc('0,5 × ' + n0(c.parts.hacim) + ' + 0,3 × ' + n0(c.parts.sikayet) + ' + 0,2 × ' + n0(c.parts.ziyaret)) + ')</span></span></li>';
+    }).join('');
+    $('custTable').innerHTML = '<thead><tr><th class="n">#</th><th>Müşteri</th><th>Fiyat bandı</th><th class="n">Ekim</th><th class="n">Tem–Eyl ort.</th><th class="n">Değişim</th><th class="n">Açık şikâyet</th><th class="n">Son ziyaret</th><th class="n">Risk</th></tr></thead><tbody>' +
+      ranked.map(function (c, i) {
+        var st = c.risk >= 50 ? 'crit' : (c.risk >= 30 ? 'warn' : 'good');
+        return '<tr><td class="n">' + (i + 1) + '</td><td class="nowrap"><b>' + esc(c.name) + '</b><span class="sub">' + esc(C.ZONE[c.zone].name) + '</span></td><td class="nowrap">' + esc(C.BANDS[c.band].name) + '</td><td class="n">' + n0(c.oct) + '</td><td class="n">' + n0(c.prev3) + '</td><td class="n' + (c.chg < -10 ? ' neg' : '') + '">' + esc(signedPct(c.chg)) + '</td><td class="n">' + c.open + '</td><td class="n">' + esc(fmtDate(c.lastVisit)) + '<span class="sub">' + c.visitDays + ' gün</span></td><td class="n">' + chip(st, n0(c.risk)) + '</td></tr>';
+      }).join('') + '</tbody>';
+  }
+
+  /* ================= 5. SATIŞ VE HEDEF ================= */
+  function renderSatis() {
+    var mi = MTD.m, remDays = MTD.total - MTD.days;
+    var tA = C.TARGET_ADET[mi], tC = C.TARGET_CIRO[mi];
+    var proA = tA * MTD.days / MTD.total, proC = tC * MTD.days / MTD.total;
+    var pA = C.pctOf(MTD.adet, proA), pC = C.pctOf(MTD.ciro, proC);
+    var stA = C.status(pA, T.sales), stC = C.status(pC, T.sales);
+    var remA = C.remainingToTarget(tA, MTD.adet, MTD.days, remDays), remC = C.remainingToTarget(tC, MTD.ciro, MTD.days, remDays);
+    var ytdA = 0, ytdC = 0, ytdTA = 0, ytdTC = 0;
+    for (var m = 0; m <= 9; m++) { ytdA += D.months[m].adet; ytdC += D.months[m].ciro; ytdTA += C.TARGET_ADET[m]; ytdTC += C.TARGET_CIRO[m]; }
+    var pY = C.pctOf(ytdC, ytdTC), stY = C.status(pY, T.sales);
+    var pipeExp = C.sum(C.PIPE.map(function (p) { var st = C.STAGES.filter(function (s) { return s.id === p[1]; })[0]; return p[2] * st.p; }));
+    $('saTiles').innerHTML = [
+      tile({ id: 'sa-adet', title: 'Kasım gönderi (ay içi)', val: esc(n0(MTD.adet)) + '<span class="u">gönderi</span>', chip: chip(stA, pct(pA, 1)),
+        foot: '<span>Orantılı hedef: <b>' + esc(n0(proA)) + '</b> (' + MTD.days + '/' + MTD.total + ' iş günü)</span>', formula: 'gerçekleşen ÷ (aylık hedef × geçen iş günü ÷ ayın iş günü) × 100', calc: '= ' + n0(MTD.adet) + ' ÷ (' + n0(tA) + ' × ' + MTD.days + '/' + MTD.total + ') × 100' }),
+      tile({ id: 'sa-ciro', title: 'Kasım ciro (ay içi)', val: esc(nd(MTD.ciro / 1e6, 2)) + '<span class="u">mn TL</span>', chip: chip(stC, pct(pC, 1)),
+        foot: '<span>Orantılı hedef: <b>' + esc(mnTL(proC)) + '</b></span>', formula: 'ciro ÷ (aylık ciro hedefi × geçen iş günü ÷ ayın iş günü) × 100', calc: '= ' + mnTL(MTD.ciro, 3) + ' ÷ (' + mnTL(tC, 3) + ' × ' + MTD.days + '/' + MTD.total + ') × 100' }),
+      tile({ id: 'sa-ytd', title: 'Ocak–Ekim ciro gerçekleşme', val: esc(pct(pY, 1)), chip: chip(stY, STATUS_TXT[stY]),
+        foot: '<span>Gerçekleşen <b>' + esc(mnTL(ytdC, 2)) + '</b> · hedef <b>' + esc(mnTL(ytdTC, 2)) + '</b></span>', formula: 'Ocak–Ekim cirosu ÷ Ocak–Ekim ciro hedefi × 100', calc: '= ' + mnTL(ytdC, 2) + ' ÷ ' + mnTL(ytdTC, 2) + ' × 100' })
+    ].join('');
+    renderSalesChart();
+    $('remDays').textContent = 'Kalan ' + remDays + ' iş günü (' + fmtShort(NEXT) + '–30.11, Pazar hariç)';
+    function remBlock(lbl, r, tgt, done, fmt, big) {
+      return '<div class="rem-b"><div class="muted small">' + esc(lbl) + '</div><div class="kpi-val rem-v">' + big + '</div>' +
+        '<p class="kf"><span class="kf-l">Kalan</span>' + esc(fmt(tgt) + ' hedef − ' + fmt(done) + ' gerçekleşen = ' + fmt(r.kalan)) +
+        '<span class="kf-c">gereken = ' + esc(fmt(r.kalan) + ' ÷ ' + remDays + ' iş günü = ' + fmt(r.gereken)) + '</span>' +
+        '<span class="kf-c">şu anki = ' + esc(fmt(done) + ' ÷ ' + MTD.days + ' iş günü = ' + fmt(r.mevcut)) + ' → ' + esc(r.artis > 0 ? signedPct(r.artis) + ' artış gerekli' : 'hedefe mevcut hızla ulaşılır') + '</span></p></div>';
+    }
+    $('remain').innerHTML = remBlock('Gönderi adedi', remA, tA, MTD.adet, n0, esc(n0(remA.gereken)) + '<span class="u">gönderi/gün</span>') +
+      remBlock('Ciro', remC, tC, MTD.ciro, function (v) { return n0(v) + ' TL'; }, esc(nd(remC.gereken / 1000, 0)) + '<span class="u">bin TL/gün</span>') +
+      '<p class="card-note rem-n">Hacmi düşen müşterilerin geri kazanılması ve teklif aşamasındaki adayların kapanması bu açığı kapatmanın iki ana yoludur.</p>';
+    var stg = C.STAGES.map(function (s) {
+      var ps = C.PIPE.filter(function (p) { return p[1] === s.id; });
+      var vol = C.sum(ps.map(function (p) { return p[2]; }));
+      return { s: s, n: ps.length, vol: vol, exp: vol * s.p, names: ps.map(function (p) { return p[0].replace(' (örnek)', ''); }) };
+    });
+    var maxV = Math.max.apply(null, stg.map(function (x) { return x.vol; }));
+    $('funnel').innerHTML = '<div class="fn"><span class="h">Aşama (olasılık)</span><span class="h bar-c">Aylık potansiyel hacim</span><span class="h r c3">Aday</span><span class="h r c4">Beklenen hacim</span>' +
+      stg.map(function (x) {
+        var w = maxV > 0 ? x.vol / maxV * 100 : 0;
+        return '<span><b>' + esc(x.s.name) + '</b> <span class="muted small">(' + esc(pct(x.s.p * 100, 0)) + ')</span></span>' +
+          '<span class="r c3">' + x.n + '</span><span class="r c4"><b>' + esc(n0(x.exp)) + '</b></span>' +
+          '<span class="bar-c"><span class="hb-t' + (x.s.id === 'kaybedildi' ? ' muted' : x.s.id === 'kazanildi' ? '' : ' alt') + '" style="display:block" title="' + esc(x.names.join(', ')) + '"><span style="width:' + w.toFixed(1) + '%"></span></span><span class="muted small">' + esc(n0(x.vol) + ' gönderi/ay') + '</span></span>';
+      }).join('') +
+      '<span><b>Toplam</b></span><span class="r c3"><b>' + C.PIPE.length + '</b></span><span class="r c4"><b>' + esc(n0(pipeExp)) + '</b> <span class="muted small">gönderi/ay</span></span></div>' +
+      '<p class="kf"><span class="kf-l">Formül</span>beklenen hacim = Σ (adayın aylık potansiyel hacmi × aşama olasılığı)<span class="kf-c">Sıradaki adımlar: ' + esc(C.PIPE.filter(function (p) { return p[1] !== 'kaybedildi' && p[4] >= REF; }).sort(function (a, b) { return a[4] < b[4] ? -1 : 1; }).slice(0, 3).map(function (p) { return fmtShort(p[4]) + ' ' + p[0].replace(' (örnek)', '') + ': ' + p[3]; }).join(' · ')) + '</span></p>';
+    var sorted = D.cust.slice().sort(function (a, b) { return b.chg - a.chg; });
+    function chgRows(list) {
+      return '<thead><tr><th>Müşteri</th><th class="n">Ekim</th><th class="n">Tem–Eyl ort.</th><th class="n">Değişim</th></tr></thead><tbody>' + list.map(function (c) {
+        return '<tr><td class="nowrap">' + esc(c.name) + '<span class="sub">' + esc(C.BANDS[c.band].name) + '</span></td><td class="n">' + n0(c.oct) + '</td><td class="n">' + n0(c.prev3) + '</td><td class="n' + (c.chg < 0 ? ' neg' : '') + '">' + esc(signedPct(c.chg)) + '</td></tr>';
+      }).join('') + '</tbody>';
+    }
+    /* Yalnızca gerçekten artan (> 0) ve azalan (< 0) müşteriler listelenir */
+    $('upTable').innerHTML = chgRows(sorted.filter(function (c) { return c.chg > 0; }).slice(0, 5));
+    $('downTable').innerHTML = chgRows(sorted.filter(function (c) { return c.chg < 0; }).reverse().slice(0, 5));
+  }
+  function renderSalesChart() {
+    var ciro = State.salesCiro, cum = State.salesCum;
+    $('sgAdet').setAttribute('aria-pressed', ciro ? 'false' : 'true'); $('sgCiro').setAttribute('aria-pressed', ciro ? 'true' : 'false');
+    $('sgMon').setAttribute('aria-pressed', cum ? 'false' : 'true'); $('sgCum').setAttribute('aria-pressed', cum ? 'true' : 'false');
+    var act = [], tgt = [], a = 0, t = 0;
+    for (var m = 0; m <= 9; m++) {
+      var av = ciro ? D.months[m].ciro : D.months[m].adet, tv = ciro ? C.TARGET_CIRO[m] : C.TARGET_ADET[m];
+      a += av; t += tv; act.push(cum ? a : av); tgt.push(cum ? t : tv);
+    }
+    var fmt = ciro ? function (v) { return mnTL(v); } : function (v) { return n0(v) + ' gönderi'; };
+    lineChart($('salesChart'), {
+      labels: C.MONTH_SHORT.slice(0, 10), series: [{ name: 'Gerçekleşen', values: act }, { name: 'Hedef', values: tgt, cls: 'ch-plan', dot: 'ch-pplan', small: true }],
+      aria: 'Ocak–Ekim 2026 ' + (ciro ? 'ciro' : 'gönderi adedi') + ' hedef ve gerçekleşen' + (cum ? ', kümülatif' : ''), fmt: fmt, yZero: cum,
+      tick: ciro ? function (v) { return nd(v / 1e6, v / 1e6 % 1 === 0 ? 0 : 1); } : function (v) { return v >= 10000 ? nd(v / 1000, 0) + ' bin' : n0(v); }
+    });
+    $('salesNote').textContent = (ciro ? 'Eksen milyon TL (KDV hariç). ' : '') + 'Ocak–Ekim ' + (cum ? 'kümülatif ' : '') + 'gerçekleşen ' + fmt(a) + ', hedef ' + fmt(t) + ' (' + pct(C.pctOf(a, t), 1) + '). Kasım ayı sürdüğü için grafikte yoktur; durumu yandaki kartta izlenir.';
+  }
+
+  /* ---------- Sekmeler ---------- */
+  var TABS = ['ozet', 'plan', 'ekip', 'musteri', 'satis'];
+  var TAB_TITLES = { ozet: 'Şube Özeti', plan: 'Günlük Planlama', ekip: 'Ekip ve Kurye Performansı', musteri: 'Müşteri Memnuniyeti ve Ziyaretler', satis: 'Satış ve Hedef' };
+  var CTX = {
+    ozet: dayLabel(REF) + ', gün sonu · geçen hafta ile ve hedefle karşılaştırma',
+    plan: 'Yarın: ' + dayLabel(NEXT) + ' · veriler ' + fmtDate(REF) + ' gün sonuna kadar',
+    ekip: 'Son 4 hafta: ' + fmtDate(W24[0]) + '–' + fmtDate(REF),
+    musteri: fmtDate(REF) + ' gün sonu itibarıyla',
+    satis: '2026 bütçesi · Kasım ' + MTD.days + '/' + MTD.total + ' iş günü geçti'
+  };
+  var DUTY = {
+    ozet: 'Şube operasyonlarının ve ekibin yönetilmesi',
+    plan: 'Günlük şube işleyişinin planlanması',
+    ekip: 'Şube operasyonlarının ve ekibin yönetilmesi',
+    musteri: 'Müşteri memnuniyeti için gerekli aksiyonların alınması · Düzenli müşteri ziyaretleri',
+    satis: 'Satış hedeflerine ulaşılması için ilgili çalışmaların yapılması'
+  };
+  var activeTab = 'ozet', rendered = {};
+  function route() {
+    var h = (window.location.hash || '').replace('#', '');
+    if (TABS.indexOf(h) < 0) { h = 'ozet'; }
+    showTab(h);
+  }
+  function showTab(id) {
+    activeTab = id;
+    document.body.setAttribute('data-tab', id);
+    TABS.forEach(function (t) {
+      var on = t === id;
+      $('panel-' + t).hidden = !on;
+      $('tab-' + t).setAttribute('aria-selected', on ? 'true' : 'false');
+      $('tab-' + t).setAttribute('tabindex', on ? '0' : '-1');
+    });
+    document.title = 'Şube Operasyon Paneli · ' + TAB_TITLES[id];
+    $('ctxTitle').innerHTML = '<b>' + esc(TAB_TITLES[id]) + '</b><span>' + esc(CTX[id]) + '</span>';
+    $('dutyLine').innerHTML = '<b>İlandaki görev:</b> ' + esc(DUTY[id]);
+    renderActive();
+  }
+  function renderActive() {
+    if (activeTab === 'ozet') { renderOzet(); }
+    else if (activeTab === 'plan') { renderPlan(); }
+    else if (activeTab === 'ekip') { if (!rendered.ekip) { renderEkip(); rendered.ekip = true; } }
+    else if (activeTab === 'musteri') { if (!rendered.musteri) { renderMusteri(); rendered.musteri = true; } }
+    else if (activeTab === 'satis') { if (!rendered.satis) { renderSatis(); rendered.satis = true; } else { renderSalesChart(); } }
+  }
+
+  /* ---------- Olaylar ---------- */
+  function bindUi() {
+    document.addEventListener('click', function (e) {
+      var t = e.target;
+      var tb = t.closest('[data-tgl]');
+      if (tb) { setTgl(tb.getAttribute('aria-controls'), tb.getAttribute('aria-expanded') !== 'true'); return; }
+      var sh = t.closest('.sc-hit');
+      if (sh) { showSchemInfo(sh.getAttribute('data-zone')); }
+    });
+    document.addEventListener('keydown', function (e) {
+      if ((e.key === 'Enter' || e.key === ' ') && e.target.closest && e.target.closest('.sc-hit')) {
+        showSchemInfo(e.target.closest('.sc-hit').getAttribute('data-zone')); e.preventDefault();
+      }
+      if (e.key === 'Escape' && $('scInfo').innerHTML) { $('scInfo').innerHTML = ''; }
+    });
+    $('wiForm').addEventListener('submit', function (e) { e.preventDefault(); renderWhatIf(); });
+    ['wiK', 'wiH', 'wiV'].forEach(function (id) { $(id).addEventListener('input', renderWhatIf); });
+    $('wiReset').addEventListener('click', function () { WI = wiDefaults(); wiFill(WI); renderWhatIf(); });
+    $('sgAdet').addEventListener('click', function () { State.salesCiro = false; renderSalesChart(); });
+    $('sgCiro').addEventListener('click', function () { State.salesCiro = true; renderSalesChart(); });
+    $('sgMon').addEventListener('click', function () { State.salesCum = false; renderSalesChart(); });
+    $('sgCum').addEventListener('click', function () { State.salesCum = true; renderSalesChart(); });
+  }
+
+  /* ---------- Başlatma ---------- */
+  function init() {
+    loadState();
+    applyTheme();
+    if (mq && mq.addEventListener) { mq.addEventListener('change', function () { applyTheme(); }); }
+    $('themeBtn').addEventListener('click', function () { State.theme = effectiveDark() ? 'light' : 'dark'; applyTheme(); saveState(); });
+    $('trendSel').innerHTML = OZ_KPIS.map(function (k) { return '<option value="' + k + '">' + esc(T[k].name) + '</option>'; }).join('');
+    $('trendSel').value = State.trendKpi;
+    $('trendSel').addEventListener('change', function (e) { State.trendKpi = e.target.value; saveState(); renderTrend(); });
+    bindUi();
+    document.querySelector('.tabs').addEventListener('keydown', function (e) {
+      if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') { return; }
+      var i = TABS.indexOf(activeTab) + (e.key === 'ArrowRight' ? 1 : -1);
+      i = (i + TABS.length) % TABS.length;
+      window.location.hash = TABS[i];
+      $('tab-' + TABS[i]).focus();
+      e.preventDefault();
+    });
+    window.addEventListener('hashchange', route);
+    var rt = null;
+    window.addEventListener('resize', function () {
+      clearTimeout(rt);
+      rt = setTimeout(function () {
+        if (activeTab === 'ozet') { renderTrend(); }
+        else if (activeTab === 'satis') { renderSalesChart(); }
+        else if (activeTab === 'plan') { if (mapState.mode === 'leaflet' && mapState.map) { mapState.map.invalidateSize(); } else if (mapState.mode === 'schematic') { drawSchematic(); } }
+      }, 150);
+    });
+    route();
+  }
+
+  if (document.readyState === 'loading') { document.addEventListener('DOMContentLoaded', init); } else { init(); }
+})();
+</script>
+</body>
+</html>
